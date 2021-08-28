@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     3.7.0
+// @version     4.0.0
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
 // @include     /^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/
 // @match       https://live.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/live/*
+// @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@ffe7d342d64cc0efd9c0ec5ace2786e6b0ef3e23/bliveproxy/bliveproxy.js
 // @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@25127e6f47da91603645f9ec3a7da65ecb1180cf/Ajax-hook/Ajax-hook.js
 // @license     MIT
 // @grant       GM_addStyle
@@ -21,8 +22,6 @@ import { GM_addStyle, GM_getValue, GM_setValue } from '../@types/tm_f'
 class NoVIP {
   public noBBChat = false
   public noBBDanmaku = false
-  public noSleep = false
-  public sleepTimer = 0
   public elmStyleCSS!: HTMLStyleElement
   public chatObserver!: MutationObserver
   public danmakuObserver!: MutationObserver
@@ -132,31 +131,6 @@ class NoVIP {
     if (!this.noBBDanmaku) return
     this.noBBDanmaku = false
     this.danmakuObserver.disconnect()
-  }
-  /**
-   * 启用反挂机
-   *
-   * @memberof NoVIP
-   */
-  public enableNOSleep() {
-    if (this.noSleep) return
-    this.noSleep = true
-    // const borderWidth = Math.ceil((window.outerWidth - window.innerWidth) / 2)
-    // const cx = Math.floor(Math.random() * (window.innerWidth + 1))
-    // const cy = Math.floor(Math.random() * (window.innerHeight + 1))
-    // const sx = window.screenX + cx + borderWidth
-    // const sy = window.screenY + cy + window.outerHeight - window.innerHeight - borderWidth
-    this.sleepTimer = setInterval(() => document.dispatchEvent(new MouseEvent('mousemove')), 10 * 60 * 1000)
-  }
-  /**
-   * 停用反挂机
-   *
-   * @memberof NoVIP
-   */
-  public disableNOSleep() {
-    if (!this.noSleep) return
-    this.noSleep = false
-    clearInterval(this.sleepTimer)
   }
   /**
    * 覆盖原有css
@@ -346,8 +320,6 @@ body[style*="overflow: hidden;"] {
     else this.disableNOBBChat()
     if (config.menu.noBBDanmaku.enable) this.enableNOBBDanmaku()
     else this.disableNOBBDanmaku()
-    if (config.menu.noSleep.enable) this.enableNOSleep()
-    else this.disableNOSleep()
     this.elmStyleCSS.innerHTML = cssText
   }
   /**
@@ -524,6 +496,7 @@ const defaultConfig: config = {
     }
   }
 }
+const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 const userConfig = <config>JSON.parse(GM_getValue('blnvConfig', JSON.stringify(defaultConfig)))
 let config: config
 if (userConfig.version === undefined || userConfig.version < defaultConfig.version) {
@@ -540,21 +513,25 @@ if (userConfig.version === undefined || userConfig.version < defaultConfig.versi
 else config = userConfig
 
 if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
-  // 屏蔽视频轮播 & 隐身入场
-  if (config.menu.invisible.enable || config.menu.noRoundPlay.enable || config.menu.noRoomSkin.enable) {
+  // 屏蔽视频轮播 & 隐身入场 & 房间皮肤
+  if (config.menu.invisible.enable || config.menu.noRoundPlay.enable || config.menu.noRoomSkin.enable || config.menu.noSleep.enable) {
     if (config.menu.noRoundPlay.enable)
-      Reflect.defineProperty(unsafeWindow, '__NEPTUNE_IS_MY_WAIFU__', {})
+      Reflect.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', {})
+    // 拦截xhr
     ah.proxy({
       onRequest: (XHRconfig, handler) => {
         // 隐身入场
         if (config.menu.invisible.enable && XHRconfig.url.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser'))
-          XHRconfig.url = '//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser?room_id=273022'
+          XHRconfig.url = XHRconfig.url.replace(/room_id=\d+/, 'room_id=273022')
         handler.next(XHRconfig)
       },
       onResponse: (response, handler) => {
-        // 隐身入场
-        if (config.menu.invisible.enable && response.config.url.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser'))
-          response.response = response.response.replace('"is_room_admin":false', '"is_room_admin":true')
+        // 屏蔽房间皮肤
+        if (config.menu.noRoomSkin.enable && response.config.url.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom')) {
+          const json = JSON.parse(response.response)
+          json.data.skin_info = undefined
+          response.response = JSON.stringify(json)
+        }
         // 屏蔽视频轮播
         if (config.menu.noRoundPlay.enable) {
           if (response.config.url.includes('//api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo'))
@@ -562,33 +539,114 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
           if (response.config.url.includes('//api.live.bilibili.com/live/getRoundPlayVideo'))
             response.status = 403
         }
-        // 屏蔽房间皮肤
-        if (config.menu.noRoomSkin.enable && response.config.url.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom')) {
-          const json = JSON.parse(response.response)
-          json.data.skin_info = undefined
-          response.response = JSON.stringify(json)
-        }
+        // 隐身入场
+        if (config.menu.invisible.enable && response.config.url.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser'))
+          response.response = response.response.replace('"is_room_admin":false', '"is_room_admin":true')
         handler.next(response)
       }
     })
-    // 屏蔽视频轮播
-    if (config.menu.noRoundPlay.enable) {
-      const _fetch = unsafeWindow.fetch
-      unsafeWindow.fetch = new Proxy(_fetch, {
-        apply: async function (target, _this, args: [RequestInfo, RequestInit | undefined]) {
+    // 拦截fetch
+    W.fetch = new Proxy(W.fetch, {
+      apply: async function (target, _this, args: [RequestInfo, RequestInit | undefined]) {
+        // 屏蔽房间皮肤
+        if (config.menu.noRoomSkin.enable && typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom')) {
+          const response: Response = await Reflect.apply(target, _this, args)
+          const body = await response.json()
+          body.data.skin_info = undefined
+          return new Response(JSON.stringify(body))
+        }
+        // 屏蔽视频轮播
+        if (config.menu.noRoundPlay.enable) {
           if (typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/live/getRoundPlayVideo')) {
             // 为了兼容其他脚本
-            const response = await target(...args)
+            const response: Response = await Reflect.apply(target, _this, args)
             return new Response(response.body, {
               status: 403,
               statusText: 'Forbidden',
               headers: response.headers
             })
           }
-          return Reflect.apply(target, _this, args)
+          if (typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo')) {
+            const response: Response = await Reflect.apply(target, _this, args)
+            const body = await response.text()
+            return new Response(body.replace('"live_status":2', '"live_status":0'))
+          }
         }
+        // 隐身入场
+        if (config.menu.invisible.enable && typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser')) {
+          args[0] = args[0].replace(/room_id=\d+/, 'room_id=273022')
+          const response: Response = await Reflect.apply(target, _this, args)
+          const body = await response.text()
+          return new Response(body.replace('"is_room_admin":false', '"is_room_admin":true'))
+        }
+        return Reflect.apply(target, _this, args)
+      }
+    })
+    // 拦截函数
+    W.webpackChunklive_room = W.webpackChunklive_room || []
+    W.webpackChunklive_room.push = new Proxy(W.webpackChunklive_room.push, {
+      apply: function (target, _this, args) {
+        for (const [name, fn] of Object.entries<Function>(args[0][1])) {
+          let fnStr = fn.toString()
+          // 屏蔽房间皮肤
+          if (config.menu.noRoomSkin.enable && fnStr.includes('/web-room/v1/index/getInfoByRoom 接口请求错误')) {
+            const regexp = /(?<left>getInfoByRoom\?room_id=.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByRoom 接口请求错误)/
+            const match = fnStr.match(regexp)
+            if (match !== null)
+              fnStr = fnStr.replace(regexp, '$<left>delete $<mut>.sent.serverResponse.data.skin_info;$<right>')
+            else console.error('屏蔽房间皮肤失效')
+          }
+          // 屏蔽视频轮
+          if (config.menu.noRoundPlay.enable && fnStr.includes('/xlive/web-room/v2/index/getRoomPlayInfo 接口请求错误')) {
+            const regexp = /(?<left>getRoomPlayInfo\?room_id=.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getRoomPlayInfo 接口请求错误)/
+            const match = fnStr.match(regexp)
+            if (match !== null)
+              fnStr = fnStr.replace(regexp, '$<left>if($<mut>.sent.serverResponse.data.live_status===2)$<mut>.sent.serverResponse.data.live_status=0;$<right>')
+            else console.error('屏蔽视频轮播失效')
+          }
+          // 屏蔽挂机检测
+          if (config.menu.noSleep.enable && fnStr.includes('prototype.sleep=function(')) {
+            const regexp = /(?<left>prototype\.sleep=function\(.*?\){)/
+            const match = fnStr.match(regexp)
+            if (match !== null)
+              fnStr = fnStr.replace(regexp, '$<left>return;')
+            else console.error('屏蔽挂机检测失效')
+          }
+          // 隐身入场
+          if (config.menu.invisible.enable && fnStr.includes('/web-room/v1/index/getInfoByUser 接口请求错误')) {
+            const regexp = /(?<left>getInfoByUser\?room_id=)"\+\w+(?<mid>\+.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByUser 接口请求错误)/
+            const match = fnStr.match(regexp)
+            if (match !== null)
+              fnStr = fnStr.replace(regexp, '$<left>273022"$<mid>$<mut>.sent.serverResponse.data.badge.is_room_admin=true;$3')
+            else console.error('隐身入场失效')
+          }
+          if (fn.toString() !== fnStr) args[0][1][name] = str2Fn(fnStr)
+        }
+        return Reflect.apply(target, _this, args)
+      }
+    })
+    // 拦截ws
+    if (config.menu.noRoundPlay.enable) {
+      // @ts-ignore
+      W.bliveproxy.addCommandHandler('PREPARING', command => {
+        delete command.round
       })
     }
+    /**
+     * str2Fn
+     *
+     * @param {string} str
+     * @returns {(Function | void)}
+     */
+    function str2Fn(str: string): Function | void {
+      const fnReg = str.match(/^function\((.*?)\){(.*)}$/)
+      if (fnReg !== null) {
+        const [, args, body] = fnReg
+        const fnStr = [...args.split(','), body]
+        return new Function(...fnStr)
+      }
+    }
+
   }
   // 屏蔽活动皮肤
   // if (config.menu.noActivityPlat.enable && !document.head.innerHTML.includes('addWaifu')) {
@@ -602,6 +660,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
   //     document.close()
   //   }
   // }
+  // 屏蔽活动皮肤
   if (config.menu.noActivityPlat.enable) {
     if (self === top) {
       if (location.pathname.startsWith('/blanc'))
@@ -619,8 +678,9 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
   })
 }
 else if (location.href.startsWith('https://live.bilibili.com/blackboard/activity-') || location.href.startsWith('https://www.bilibili.com/blackboard/live/')) {
+  // 屏蔽活动皮肤
   if (config.menu.noActivityPlat.enable)
-    unsafeWindow.addEventListener("message", msg => {
+    W.addEventListener("message", msg => {
       if (msg.origin === 'https://live.bilibili.com' && (<string>msg.data).startsWith('https://live.bilibili.com/blanc/'))
         location.href = msg.data
     })
