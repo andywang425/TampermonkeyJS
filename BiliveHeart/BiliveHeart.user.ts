@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name        BiliveHeart
 // @namespace   https://github.com/lzghzr/TampermonkeyJS
-// @version     0.0.1
+// @version     0.0.2
 // @author      lzghzr
 // @description B站直播心跳
 // @include     /^https?:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/
 // @require     https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js
 // @license     MIT
 // @grant       none
-// @run-at      document-start
+// @run-at      document-end
 // ==/UserScript==
 /// <reference path='BiliveHeart.d.ts' />
 import * as CryptoJS from 'crypto-js'
@@ -219,44 +219,41 @@ class RoomHeart {
     return str.slice(0, -1)
   }
 }
+; (async () => {
+  const bagList: BagList = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/gift/bag_list?t=1630203941175&room_id=${W.BilibiliLive.ROOMID}`, {
+    mode: 'cors',
+    credentials: 'include',
+  }).then(res => res.json())
+  if (bagList.code !== 0) return console.error(GM_info.script.name, '未获取到包裹列表')
 
-document.addEventListener('readystatechange', async () => {
-  if (document.readyState === 'complete') {
-    const bagList: BagList = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/gift/bag_list?t=1630203941175&room_id=${W.BilibiliLive.ROOMID}`, {
-      mode: 'cors',
-      credentials: 'include',
-    }).then(res => res.json())
-    if (bagList.code !== 0) return console.error(GM_info.script.name, '未获取到包裹列表')
-
-    let giftNum = 0
-    if (bagList.data.list.length > 0)
-      for (const gift of bagList.data.list) {
-        if (gift.gift_id === 30607) {
-          const expire = (gift.expire_at - Date.now() / 1000) / 60 / 60 / 24
-          if (expire > 6 && expire <= 7) giftNum += gift.gift_num
-        }
+  let giftNum = 0
+  if (bagList.data.list.length > 0)
+    for (const gift of bagList.data.list) {
+      if (gift.gift_id === 30607) {
+        const expire = (gift.expire_at - Date.now() / 1000) / 60 / 60 / 24
+        if (expire > 6 && expire <= 7) giftNum += gift.gift_num
       }
-    if (giftNum >= 24) return console.error(GM_info.script.name, '已获取今日小心心')
-
-    const medal: Medal = await fetch('//api.live.bilibili.com/i/api/medal?page=1&pageSize=1000', {
-      mode: 'cors',
-      credentials: 'include',
-    }).then(res => res.json())
-    if (medal.code !== 0) return console.error(GM_info.script.name, '未获取到勋章列表')
-
-    const fansMedalList = medal.data.fansMedalList
-    const control = 24 - giftNum
-    const loopNum = Math.ceil(control / fansMedalList.length)
-    for (let i = 0; i < loopNum; i++) {
-      let count = 0
-      for (const funsMedalData of fansMedalList) {
-        if (count >= control) break
-        new RoomHeart(funsMedalData.roomid)
-        await Sleep(1000)
-        count++
-      }
-      await Sleep(6 * 60 * 1000)
     }
+  if (giftNum >= 24) return console.error(GM_info.script.name, '已获取今日小心心')
+
+  const medal: Medal = await fetch('//api.live.bilibili.com/i/api/medal?page=1&pageSize=1000', {
+    mode: 'cors',
+    credentials: 'include',
+  }).then(res => res.json())
+  if (medal.code !== 0) return console.error(GM_info.script.name, '未获取到勋章列表')
+
+  const fansMedalList = medal.data.fansMedalList
+  const control = 24 - giftNum
+  const loopNum = Math.ceil(control / fansMedalList.length)
+  for (let i = 0; i < loopNum; i++) {
+    let count = 0
+    for (const funsMedalData of fansMedalList) {
+      if (count >= control) break
+      new RoomHeart(funsMedalData.roomid)
+      await Sleep(1000)
+      count++
+    }
+    await Sleep(6 * 60 * 1000)
   }
   /**
   *
@@ -266,4 +263,4 @@ document.addEventListener('readystatechange', async () => {
   function Sleep(ms: number): Promise<'sleep'> {
     return new Promise<'sleep'>(resolve => setTimeout(() => resolve('sleep'), ms))
   }
-})
+})()
