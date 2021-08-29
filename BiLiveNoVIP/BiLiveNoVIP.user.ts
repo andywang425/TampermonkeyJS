@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.0
+// @version     4.0.1
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
 // @include     /^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/
 // @match       https://live.bilibili.com/blackboard/activity-*
+// @match       https://www.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/live/*
 // @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@ffe7d342d64cc0efd9c0ec5ace2786e6b0ef3e23/bliveproxy/bliveproxy.js
 // @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@25127e6f47da91603645f9ec3a7da65ecb1180cf/Ajax-hook/Ajax-hook.js
@@ -16,8 +17,10 @@
 // @grant       GM_setValue
 // @run-at      document-start
 // ==/UserScript==
-/// <reference path="BiLiveNoVIP.d.ts" />
+/// <reference path='BiLiveNoVIP.d.ts' />
 import { GM_addStyle, GM_getValue, GM_setValue } from '../@types/tm_f'
+
+const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 
 class NoVIP {
   public noBBChat = false
@@ -496,7 +499,6 @@ const defaultConfig: config = {
     }
   }
 }
-const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 const userConfig = <config>JSON.parse(GM_getValue('blnvConfig', JSON.stringify(defaultConfig)))
 let config: config
 if (userConfig.version === undefined || userConfig.version < defaultConfig.version) {
@@ -669,15 +671,15 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
         location.href = location.href.replace(location.origin, `${location.origin}/blanc`)
     }
     else {
-      top.postMessage(location.origin + location.pathname, 'https://live.bilibili.com')
-      top.postMessage(location.origin + location.pathname, 'https://www.bilibili.com')
+      top?.postMessage(location.origin + location.pathname, 'https://live.bilibili.com')
+      top?.postMessage(location.origin + location.pathname, 'https://www.bilibili.com')
     }
   }
   document.addEventListener('readystatechange', () => {
     if (document.readyState === 'complete') new NoVIP().Start()
   })
 }
-else if (location.href.startsWith('https://live.bilibili.com/blackboard/activity-') || location.href.startsWith('https://www.bilibili.com/blackboard/live/')) {
+else if (location.href.includes('bilibili.com/blackboard/')) {
   // 屏蔽活动皮肤
   if (config.menu.noActivityPlat.enable)
     W.addEventListener("message", msg => {
