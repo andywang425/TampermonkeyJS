@@ -165,6 +165,13 @@ interface GMXMLHttpRequestOptions {
    */
   data?: string
   /**
+   * some string to send via a POST request
+   * 
+   * @type {string}
+   * @memberof GMXMLHttpRequestOptions
+   */
+  body?: string
+  /**
    * send the data string in binary mode
    * 
    * @type {boolean}
