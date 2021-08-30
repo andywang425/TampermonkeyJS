@@ -93,13 +93,3 @@ interface sellitem {
   needs_email_confirmation: boolean
   email_domain: string
 }
-// XHROptions
-interface XHROptions extends GMXMLHttpRequestOptions {
-  GM?: boolean
-  cookie?: boolean
-}
-// XHR返回
-interface response<T> {
-  response: XMLHttpRequest | GMXMLHttpRequestResponse
-  body: T
-}

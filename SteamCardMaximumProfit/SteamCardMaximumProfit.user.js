@@ -191,7 +191,7 @@ async function quickSellItem(itemInfo) {
         data: `sessionid=${W.g_sessionID}&appid=${itemInfo.rgItem.description.appid}\
 &contextid=${itemInfo.rgItem.contextid}&assetid=${itemInfo.rgItem.assetid}&amount=1&price=${itemInfo.price}`,
         responseType: 'json',
-        cookie: true
+        withCredentials: true
     });
     if (sellitem === undefined || sellitem.response.status !== 200 || !sellitem.body.success)
         itemInfo.status = 'error';
@@ -280,7 +280,7 @@ function XHR(XHROptions) {
             xhr.open(XHROptions.method, XHROptions.url);
             if (XHROptions.method === 'POST' && xhr.getResponseHeader('Content-Type') === null)
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8');
-            if (XHROptions.cookie)
+            if (XHROptions.withCredentials)
                 xhr.withCredentials = true;
             if (XHROptions.responseType !== undefined)
                 xhr.responseType = XHROptions.responseType;
@@ -297,11 +297,14 @@ function XHR(XHROptions) {
 }
 class ItemInfo {
     constructor(rgItem, price) {
-        this._status = '';
         this.rgItem = rgItem;
         if (price !== undefined)
             this.price = price;
     }
+    rgItem;
+    price;
+    formatPrice;
+    _status = '';
     get status() {
         return this._status;
     }
@@ -333,4 +336,5 @@ class ItemInfo {
                 break;
         }
     }
+    lowestPrice;
 }
