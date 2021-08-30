@@ -701,7 +701,7 @@ class BilibiliToken {
         xhr.open(XHROptions.method, XHROptions.url)
         if (XHROptions.method === 'POST' && xhr.getResponseHeader('Content-Type') === null)
           xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8')
-        if (XHROptions.cookie) xhr.withCredentials = true
+        if (XHROptions.withCredentials) xhr.withCredentials = true
         if (XHROptions.responseType !== undefined) xhr.responseType = XHROptions.responseType
         xhr.timeout = 30 * 1000
         xhr.onload = ev => {

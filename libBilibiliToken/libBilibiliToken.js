@@ -11,29 +11,33 @@
 // @run-at      document-start
 // ==/UserScript==
 class BilibiliToken {
-    constructor() {
-        this._W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow;
-        this.biliLocalId = BilibiliToken.biliLocalId;
-        this.buvid = BilibiliToken.buvid;
-        this.deviceId = this.biliLocalId;
-        this.fingerprint = BilibiliToken.fingerprint;
-        this.guid = this.buvid;
-        this.localFingerprint = this.fingerprint;
-        this.localId = this.buvid;
-        this.headers = {
-            'User-Agent': 'Mozilla/5.0 BiliTV/1.2.4.1 (bbcallen@gmail.com)',
-            'APP-KEY': BilibiliToken.mobiApp,
-            'Buvid': this.buvid,
-            'env': 'prod'
-        };
-    }
+    _W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow;
+    static __loginSecretKey = '59b43e04ad6965f34319062b478f83dd';
+    static loginAppKey = '4409e2ce8ffd12b8';
+    static __secretKey = '560c52ccd288fed045859ed18bffd973';
+    static appKey = '1d8b6e7d45233436';
     static get biliLocalId() { return this.RandomID(20); }
+    biliLocalId = BilibiliToken.biliLocalId;
+    static build = '102401';
     static get buvid() { return this.RandomID(37).toLocaleUpperCase(); }
+    buvid = BilibiliToken.buvid;
+    static channel = 'master';
+    static device = 'Sony';
     static get deviceId() { return this.biliLocalId; }
+    deviceId = this.biliLocalId;
+    static deviceName = 'J9110';
+    static devicePlatform = 'Android10SonyJ9110';
     static get fingerprint() { return this.RandomID(62); }
+    fingerprint = BilibiliToken.fingerprint;
     static get guid() { return this.buvid; }
+    guid = this.buvid;
     static get localFingerprint() { return this.fingerprint; }
+    localFingerprint = this.fingerprint;
     static get localId() { return this.buvid; }
+    localId = this.buvid;
+    static mobiApp = 'android_tv_yst';
+    static networkstate = 'wifi';
+    static platform = 'android';
     static get TS() { return Math.floor(Date.now() / 1000); }
     static get RND() { return this.RandomNum(9); }
     static RandomNum(length) {
@@ -60,6 +64,12 @@ class BilibiliToken {
             'env': 'prod'
         };
     }
+    headers = {
+        'User-Agent': 'Mozilla/5.0 BiliTV/1.2.4.1 (bbcallen@gmail.com)',
+        'APP-KEY': BilibiliToken.mobiApp,
+        'Buvid': this.buvid,
+        'env': 'prod'
+    };
     static get loginQuery() {
         const biliLocalId = this.biliLocalId;
         const buvid = this.buvid;
@@ -368,7 +378,7 @@ class BilibiliToken {
                 xhr.open(XHROptions.method, XHROptions.url);
                 if (XHROptions.method === 'POST' && xhr.getResponseHeader('Content-Type') === null)
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8');
-                if (XHROptions.cookie)
+                if (XHROptions.withCredentials)
                     xhr.withCredentials = true;
                 if (XHROptions.responseType !== undefined)
                     xhr.responseType = XHROptions.responseType;
@@ -384,15 +394,3 @@ class BilibiliToken {
         });
     }
 }
-BilibiliToken.__loginSecretKey = '59b43e04ad6965f34319062b478f83dd';
-BilibiliToken.loginAppKey = '4409e2ce8ffd12b8';
-BilibiliToken.__secretKey = '560c52ccd288fed045859ed18bffd973';
-BilibiliToken.appKey = '1d8b6e7d45233436';
-BilibiliToken.build = '102401';
-BilibiliToken.channel = 'master';
-BilibiliToken.device = 'Sony';
-BilibiliToken.deviceName = 'J9110';
-BilibiliToken.devicePlatform = 'Android10SonyJ9110';
-BilibiliToken.mobiApp = 'android_tv_yst';
-BilibiliToken.networkstate = 'wifi';
-BilibiliToken.platform = 'android';
