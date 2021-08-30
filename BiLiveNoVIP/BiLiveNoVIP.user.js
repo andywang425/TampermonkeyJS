@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.1
+// @version     4.0.2
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -469,7 +469,7 @@ if (userConfig.version === undefined || userConfig.version < defaultConfig.versi
             defaultConfig.menu[x].enable = userConfig.menu[x].enable;
         }
         catch (error) {
-            console.error(error);
+            console.error(GM_info.script.name, error);
         }
     }
     config = defaultConfig;
@@ -541,20 +541,20 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
                 for (const [name, fn] of Object.entries(args[0][1])) {
                     let fnStr = fn.toString();
                     if (config.menu.noRoomSkin.enable && fnStr.includes('/web-room/v1/index/getInfoByRoom 接口请求错误')) {
-                        const regexp = /(?<left>getInfoByRoom\?room_id=.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByRoom 接口请求错误)/;
+                        const regexp = /(?<left>getInfoByRoom\?room_id=.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByRoom 接口请求错误)/s;
                         const match = fnStr.match(regexp);
                         if (match !== null)
                             fnStr = fnStr.replace(regexp, '$<left>delete $<mut>.sent.serverResponse.data.skin_info;$<right>');
                         else
-                            console.error('屏蔽房间皮肤失效');
+                            console.error(GM_info.script.name, '屏蔽房间皮肤失效');
                     }
                     if (config.menu.noRoundPlay.enable && fnStr.includes('/xlive/web-room/v2/index/getRoomPlayInfo 接口请求错误')) {
-                        const regexp = /(?<left>getRoomPlayInfo\?room_id=.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getRoomPlayInfo 接口请求错误)/;
+                        const regexp = /(?<left>getRoomPlayInfo\?room_id=.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getRoomPlayInfo 接口请求错误)/s;
                         const match = fnStr.match(regexp);
                         if (match !== null)
                             fnStr = fnStr.replace(regexp, '$<left>if($<mut>.sent.serverResponse.data.live_status===2)$<mut>.sent.serverResponse.data.live_status=0;$<right>');
                         else
-                            console.error('屏蔽视频轮播失效');
+                            console.error(GM_info.script.name, '屏蔽视频轮播失效');
                     }
                     if (config.menu.noSleep.enable && fnStr.includes('prototype.sleep=function(')) {
                         const regexp = /(?<left>prototype\.sleep=function\(.*?\){)/;
@@ -562,15 +562,15 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
                         if (match !== null)
                             fnStr = fnStr.replace(regexp, '$<left>return;');
                         else
-                            console.error('屏蔽挂机检测失效');
+                            console.error(GM_info.script.name, '屏蔽挂机检测失效');
                     }
                     if (config.menu.invisible.enable && fnStr.includes('/web-room/v1/index/getInfoByUser 接口请求错误')) {
-                        const regexp = /(?<left>getInfoByUser\?room_id=)"\+\w+(?<mid>\+.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByUser 接口请求错误)/;
+                        const regexp = /(?<left>getInfoByUser\?room_id=)"\+\w+(?<mid>\+.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByUser 接口请求错误)/s;
                         const match = fnStr.match(regexp);
                         if (match !== null)
                             fnStr = fnStr.replace(regexp, '$<left>273022"$<mid>$<mut>.sent.serverResponse.data.badge.is_room_admin=true;$3');
                         else
-                            console.error('隐身入场失效');
+                            console.error(GM_info.script.name, '隐身入场失效');
                     }
                     if (fn.toString() !== fnStr)
                         args[0][1][name] = str2Fn(fnStr);
@@ -584,7 +584,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
             });
         }
         function str2Fn(str) {
-            const fnReg = str.match(/^function\((.*?)\){(.*)}$/);
+            const fnReg = str.match(/^function\((.*?)\){(.*)}$/s);
             if (fnReg !== null) {
                 const [, args, body] = fnReg;
                 const fnStr = [...args.split(','), body];
