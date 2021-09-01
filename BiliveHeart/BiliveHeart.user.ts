@@ -16,6 +16,8 @@ export { }
 
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 
+const patchData: Record<number, patchData> = {}
+
 class RoomHeart {
   constructor(roomID: number) {
     this.getInfoByRoom(roomID)
@@ -41,9 +43,15 @@ class RoomHeart {
   private get ts() {
     return Date.now()
   }
+  // 目前不启用
   // 获得patchData，需JSON.stringify
-  private patchData: string[] = []
-  private isPatch = this.patchData.length === 0 ? 0 : 1
+  private get patchData(): patchData[] {
+    const list: patchData[] = []
+    for (const [_, data] of Object.entries<patchData>(patchData)) list.push(data)
+    return list
+  }
+  // @ts-ignore 目前不启用
+  private get isPatch(): number { return this.patchData.length === 0 ? 0 : 1 }
   // 获得ua
   private ua = W && W.navigator ? W.navigator.userAgent : ''
   // 获得csrf
@@ -109,8 +117,10 @@ class RoomHeart {
       id: JSON.stringify(this.id),
       device: JSON.stringify(this.device),
       ts: this.ts,
-      is_patch: this.isPatch,
-      heart_beat: JSON.stringify(this.patchData),
+      is_patch: 0,
+      // is_patch: this.isPatch,
+      heart_beat: '[]',
+      // heart_beat: JSON.stringify(this.patchData),
       ua: this.ua,
     }
     const e: E = await fetch('//live-trace.bilibili.com/xlive/data-interface/v1/x25Kn/E', {
@@ -149,7 +159,7 @@ class RoomHeart {
     }
     const s = this.sypder(JSON.stringify(sypderData), this.secretRule)
     const arg = Object.assign({ s }, sypderData)
-    this.patchData[0] = JSON.stringify(arg)
+    patchData[this.roomID] = arg
     const x: E = await fetch('//live-trace.bilibili.com/xlive/data-interface/v1/x25Kn/X', {
       headers: {
         "content-type": "application/x-www-form-urlencoded",
@@ -220,7 +230,7 @@ class RoomHeart {
   }
 }
 ; (async () => {
-  const bagList: BagList = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/gift/bag_list?t=1630203941175&room_id=${W.BilibiliLive.ROOMID}`, {
+  const bagList: BagList = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/gift/bag_list?t=${Date.now()}&room_id=${W.BilibiliLive.ROOMID}`, {
     mode: 'cors',
     credentials: 'include',
   }).then(res => res.json())

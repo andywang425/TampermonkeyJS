@@ -11,6 +11,7 @@
 // @run-at      document-end
 // ==/UserScript==
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow;
+const patchData = {};
 class RoomHeart {
     constructor(roomID) {
         this.getInfoByRoom(roomID);
@@ -31,7 +32,12 @@ class RoomHeart {
     get ts() {
         return Date.now();
     }
-    patchData = [];
+    get patchData() {
+        const list = [];
+        for (const [_, data] of Object.entries(patchData))
+            list.push(data);
+        return list;
+    }
     isPatch = this.patchData.length === 0 ? 0 : 1;
     ua = W && W.navigator ? W.navigator.userAgent : '';
     csrf = this.getItem("bili_jct") || '';
@@ -110,7 +116,7 @@ class RoomHeart {
         };
         const s = this.sypder(JSON.stringify(sypderData), this.secretRule);
         const arg = Object.assign({ s }, sypderData);
-        this.patchData[0] = JSON.stringify(arg);
+        patchData[this.roomID] = arg;
         const x = await fetch('//live-trace.bilibili.com/xlive/data-interface/v1/x25Kn/X', {
             headers: {
                 "content-type": "application/x-www-form-urlencoded",
@@ -184,7 +190,7 @@ class RoomHeart {
 }
 ;
 (async () => {
-    const bagList = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/gift/bag_list?t=1630203941175&room_id=${W.BilibiliLive.ROOMID}`, {
+    const bagList = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/gift/bag_list?t=${Date.now()}&room_id=${W.BilibiliLive.ROOMID}`, {
         mode: 'cors',
         credentials: 'include',
     }).then(res => res.json());

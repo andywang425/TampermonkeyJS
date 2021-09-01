@@ -8,6 +8,10 @@ interface sypderData {
   ua: string,
 }
 
+interface patchData extends sypderData {
+  s: string
+}
+
 interface BagList {
   code: number
   message: string
