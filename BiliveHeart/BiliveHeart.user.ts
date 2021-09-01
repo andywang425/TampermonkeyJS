@@ -58,10 +58,16 @@ class RoomHeart {
   private csrf = this.getItem("bili_jct") || ''
 
   private nextInterval = Math.floor(5) + Math.floor(Math.random() * (60 - 5))
-  private heartbeatInterval!: number
+  private heartBeatInterval!: number
   private secretKey!: string
   private secretRule!: number[]
   private timestamp!: number
+
+  private lastHeartbeatTimestamp = Date.now()
+  private get watchTimeFromLastReport(): number {
+    const t = Math.ceil(((new Date).getTime() - this.lastHeartbeatTimestamp) / 1000)
+    return t < 0 ? 0 : t > this.heartBeatInterval ? this.heartBeatInterval : t
+  }
   /**
    * 获取房间信息，可以用window.BilibiliLive代替，但需要时间加载
    *
@@ -71,13 +77,12 @@ class RoomHeart {
    * @memberof RoomHeart
    */
   private async getInfoByRoom(roomID: number) {
-    const getInfoByRoom: RoomInfo = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=${roomID}`, {
+    const getInfoByRoom: RoomInfo = await fetch(`//api.live.bilibili.com/room/v1/Room/get_info?room_id=${roomID}&from=room`, {
       mode: 'cors',
       credentials: 'include',
     }).then(res => res.json())
     if (getInfoByRoom.code === 0) {
-      const roomInfo = getInfoByRoom.data.room_info
-        ; ({ area_id: this.areaID, parent_area_id: this.parentID, room_id: this.roomID } = roomInfo)
+      ; ({ area_id: this.areaID, parent_area_id: this.parentID, room_id: this.roomID } = getInfoByRoom.data)
       // this.webHeartBeat()
       this.e()
     }
@@ -104,6 +109,29 @@ class RoomHeart {
       setTimeout(() => this.webHeartBeat(), this.nextInterval * 1000)
     }
     else console.error(GM_info.script.name, `房间 ${this.roomID} 心跳失败`)
+  }
+  /**
+   * 暂时无用
+   *
+   * @private
+   * @returns
+   * @memberof RoomHeart
+   */
+  private async savePatchData() {
+    if (this.seq > 6) return
+    const sypderData: sypderData = {
+      id: JSON.stringify(this.id),
+      device: JSON.stringify(this.device),
+      ets: this.timestamp,
+      benchmark: this.secretKey,
+      time: this.watchTimeFromLastReport > this.heartBeatInterval ? this.heartBeatInterval : this.watchTimeFromLastReport,
+      ts: this.ts,
+      ua: this.ua,
+    }
+    const s = this.sypder(JSON.stringify(sypderData), this.secretRule)
+    const arg = Object.assign({ s }, sypderData)
+    patchData[this.roomID] = arg
+    setTimeout(() => this.savePatchData(), 15 * 1000)
   }
   /**
    * E
@@ -134,8 +162,9 @@ class RoomHeart {
     }).then(res => res.json())
     if (e.code === 0) {
       this.seq += 1
-        ; ({ heartbeat_interval: this.heartbeatInterval, secret_key: this.secretKey, secret_rule: this.secretRule, timestamp: this.timestamp } = e.data)
-      setTimeout(() => this.x(), this.heartbeatInterval * 1000)
+        ; ({ heartbeat_interval: this.heartBeatInterval, secret_key: this.secretKey, secret_rule: this.secretRule, timestamp: this.timestamp } = e.data)
+      setTimeout(() => this.x(), this.heartBeatInterval * 1000)
+      // this.savePatchData()
     }
     else console.error(GM_info.script.name, `房间 ${this.roomID} 获取小心心失败`)
   }
@@ -153,13 +182,14 @@ class RoomHeart {
       device: JSON.stringify(this.device),
       ets: this.timestamp,
       benchmark: this.secretKey,
-      time: this.heartbeatInterval,
+      time: this.heartBeatInterval,
       ts: this.ts,
       ua: this.ua,
     }
     const s = this.sypder(JSON.stringify(sypderData), this.secretRule)
     const arg = Object.assign({ s }, sypderData)
     patchData[this.roomID] = arg
+    this.lastHeartbeatTimestamp = Date.now()
     const x: E = await fetch('//live-trace.bilibili.com/xlive/data-interface/v1/x25Kn/X', {
       headers: {
         "content-type": "application/x-www-form-urlencoded",
@@ -171,8 +201,8 @@ class RoomHeart {
     }).then(res => res.json())
     if (x.code === 0) {
       this.seq += 1
-        ; ({ heartbeat_interval: this.heartbeatInterval, secret_key: this.secretKey, secret_rule: this.secretRule, timestamp: this.timestamp } = x.data)
-      setTimeout(() => this.x(), this.heartbeatInterval * 1000)
+        ; ({ heartbeat_interval: this.heartBeatInterval, secret_key: this.secretKey, secret_rule: this.secretRule, timestamp: this.timestamp } = x.data)
+      setTimeout(() => this.x(), this.heartBeatInterval * 1000)
     }
     else console.error(GM_info.script.name, `房间 ${this.roomID} 小心心 心跳失败`)
   }
@@ -230,7 +260,7 @@ class RoomHeart {
   }
 }
 ; (async () => {
-  const bagList: BagList = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/gift/bag_list?t=${Date.now()}&room_id=${W.BilibiliLive.ROOMID}`, {
+  const bagList: BagList = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/gift/bag_list?t=${Date.now()}&room_id=23058`, {
     mode: 'cors',
     credentials: 'include',
   }).then(res => res.json())

@@ -99,41 +99,46 @@ interface MedalDataFansMedalList {
 
 interface RoomInfo {
   code: number
+  msg: string
   message: string
-  ttl: number
   data: RoomInfoData
 }
 interface RoomInfoData {
-  room_info: RoomInfoDataRoomInfo
-}
-interface RoomInfoDataRoomInfo {
   uid: number
   room_id: number
   short_id: number
-  title: string
-  cover: string
-  tags: string
-  background: string
+  attention: number
+  online: number
+  is_portrait: boolean
   description: string
   live_status: number
-  live_start_time: number
-  live_screen_type: number
-  lock_status: number
-  lock_time: number
-  hidden_status: number
-  hidden_time: number
   area_id: number
-  area_name: string
   parent_area_id: number
   parent_area_name: string
+  old_area_id: number
+  background: string
+  title: string
+  user_cover: string
   keyframe: string
-  special_type: number
+  is_strict_room: boolean
+  live_time: string
+  tags: string
+  is_anchor: number
+  room_silent_type: string
+  room_silent_level: number
+  room_silent_second: number
+  area_name: string
+  pendants: string
+  area_pendants: string
+  hot_words: string[]
+  hot_words_status: number
+  verify: string
   up_session: string
   pk_status: number
-  is_studio: boolean
-  on_voice_join: number
-  online: number
-  room_type: { [key: string]: number }
+  pk_id: number
+  battle_id: number
+  allow_change_area_time: number
+  allow_upload_cover_time: number
 }
 
 interface WebHeartBeat {
