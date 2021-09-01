@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.2
+// @version     4.0.3
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -540,6 +540,14 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
             apply: function (target, _this, args) {
                 for (const [name, fn] of Object.entries(args[0][1])) {
                     let fnStr = fn.toString();
+                    if (fnStr.includes('return this.chatList.children.length')) {
+                        const regexp = /(?<left>return )this\.chatList\.children\.length/s;
+                        const match = fnStr.match(regexp);
+                        if (match !== null)
+                            fnStr = fnStr.replace(regexp, '$<left>[...this.chatList.children].reduce((a,c)=>c.classList.contains("danmaku-item")?a+1:a,0)');
+                        else
+                            console.error(GM_info.script.name, '增强聊天显示失效');
+                    }
                     if (config.menu.noRoomSkin.enable && fnStr.includes('/web-room/v1/index/getInfoByRoom 接口请求错误')) {
                         const regexp = /(?<left>getInfoByRoom\?room_id=.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByRoom 接口请求错误)/s;
                         const match = fnStr.match(regexp);
