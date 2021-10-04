@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        BiliveHeart
 // @namespace   https://github.com/lzghzr/TampermonkeyJS
-// @version     0.0.2
+// @version     0.0.3
 // @author      lzghzr
 // @description B站直播心跳
 // @include     /^https?:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/
@@ -207,13 +207,23 @@ class RoomHeart {
         }
     if (giftNum >= 24)
         return console.error(GM_info.script.name, '已获取今日小心心');
-    const medal = await fetch('//api.live.bilibili.com/i/api/medal?page=1&pageSize=1000', {
+    const fetchMedal = async (pn = 1) => await fetch(`//api.live.bilibili.com/i/api/medal?page=${pn}&pageSize=10`, {
         mode: 'cors',
         credentials: 'include',
     }).then(res => res.json());
+    const medal = await fetchMedal();
     if (medal.code !== 0)
         return console.error(GM_info.script.name, '未获取到勋章列表');
-    const fansMedalList = medal.data.fansMedalList;
+    const medalData = medal.data;
+    const fansMedalList = medalData.fansMedalList;
+    let totalpages = medalData.pageinfo?.totalpages;
+    if (totalpages > 1) {
+        totalpages = totalpages > 3 ? 3 : totalpages;
+        for (let index = 2; index <= totalpages; index++) {
+            const medalTemp = await fetchMedal(index);
+            fansMedalList.push(...medalTemp.data.fansMedalList);
+        }
+    }
     const control = 24 - giftNum;
     const loopNum = Math.ceil(control / fansMedalList.length);
     for (let i = 0; i < loopNum; i++) {
