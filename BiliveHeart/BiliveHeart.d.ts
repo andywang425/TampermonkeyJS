@@ -52,6 +52,10 @@ interface MedalData {
   count: number
   fansMedalList: MedalDataFansMedalList[]
   name: string
+  pageinfo: {
+    totalpages: number
+    curPage: number
+  }
 }
 interface MedalDataFansMedalList {
   uid: number
