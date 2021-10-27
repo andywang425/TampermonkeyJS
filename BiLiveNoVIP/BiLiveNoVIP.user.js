@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.3
+// @version     4.0.4
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -9,7 +9,7 @@
 // @match       https://live.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/live/*
-// @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@ffe7d342d64cc0efd9c0ec5ace2786e6b0ef3e23/bliveproxy/bliveproxy.js
+// @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@45f5c76d2f49a16c1cdaae78397779ee6fd72e8e/bliveproxy/bliveproxy.js
 // @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@25127e6f47da91603645f9ec3a7da65ecb1180cf/Ajax-hook/Ajax-hook.js
 // @license     MIT
 // @grant       GM_addStyle
@@ -49,7 +49,7 @@ class NoVIP {
             mutations.forEach(mutation => {
                 mutation.addedNodes.forEach(addedNode => {
                     const danmakuNode = addedNode instanceof Text ? addedNode.parentElement : addedNode;
-                    if (danmakuNode?.className === 'bilibili-danmaku') {
+                    if (danmakuNode?.classList?.contains('bilibili-danmaku')) {
                         const danmakuText = danmakuNode.innerText;
                         const dateNow = Date.now();
                         if (danmakuMessage.has(danmakuText) && dateNow - danmakuMessage.get(danmakuText) < 5000)
