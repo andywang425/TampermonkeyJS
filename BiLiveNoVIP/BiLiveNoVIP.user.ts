@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.4
+// @version     4.0.5
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -253,10 +253,13 @@ class NoVIP {
   display: none !important;
 }`
     if (config.menu.noEmoticons.enable) cssText += `
-.bilibili-danmaku > img,
 #chat-control-panel-vm .emoticons-panel,
-.chat-item[data-type="1"] {
-  display: none !important;
+.chat-item.chat-emoticon {
+display: none !important;
+}`
+    if (config.menu.noEmotDanmaku.enable) cssText += `
+.bilibili-danmaku > img {
+display: none !important;
 }`
     if (config.menu.noKanBanMusume.enable) cssText += `
 #my-dear-haruna-vm {
@@ -373,7 +376,7 @@ body[style*="overflow: hidden;"] {
 
     // 替换原有设置
     // 循环插入内容
-    let i = listLength
+    let i = listLength + 10
     const listNodes = <NodeListOf<HTMLLIElement>>elmUList.childNodes
     for (const x in config.menu) {
       const clild = theSameName(listNodes, x)
@@ -431,7 +434,7 @@ body[style*="overflow: hidden;"] {
 
 // 加载设置
 const defaultConfig: config = {
-  version: 1629375942428,
+  version: 1639055746554,
   menu: {
     noGiftMsg: {
       name: '屏蔽全部礼物及广播',
@@ -446,7 +449,11 @@ const defaultConfig: config = {
       enable: false
     },
     noEmoticons: {
-      name: '屏蔽表情特效',
+      name: '屏蔽表情动画（右下角）',
+      enable: false
+    },
+    noEmotDanmaku: {
+      name: '屏蔽表情弹幕',
       enable: false
     },
     noKanBanMusume: {
