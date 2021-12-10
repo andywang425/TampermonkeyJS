@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        BiliveHeart
 // @namespace   https://github.com/lzghzr/TampermonkeyJS
-// @version     0.0.3
+// @version     0.0.4
 // @author      lzghzr
 // @description B站直播心跳
 // @include     /^https?:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/
@@ -267,7 +267,7 @@ class RoomHeart {
   if (bagList.code !== 0) return console.error(GM_info.script.name, '未获取到包裹列表')
 
   let giftNum = 0
-  if (bagList.data.list.length > 0)
+  if (bagList.data.list != null && bagList.data.list.length > 0)
     for (const gift of bagList.data.list) {
       if (gift.gift_id === 30607) {
         const expire = (gift.expire_at - Date.now() / 1000) / 60 / 60 / 24
@@ -289,7 +289,7 @@ class RoomHeart {
 
   // 尽量一次性获取到 24 个
   if (totalpages > 1) {
-    totalpages  = totalpages > 3 ? 3 : totalpages
+    totalpages = totalpages > 3 ? 3 : totalpages
     for (let index = 2; index <= totalpages; index++) {
       const medalTemp = await fetchMedal(index)
       fansMedalList.push(...medalTemp.data.fansMedalList)

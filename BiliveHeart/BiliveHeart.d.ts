@@ -19,7 +19,7 @@ interface BagList {
   data: BagListData
 }
 interface BagListData {
-  list: BagListDataList[]
+  list: BagListDataList[] | null
   time: number
 }
 interface BagListDataList {

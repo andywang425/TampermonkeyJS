@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        BiliveHeart
 // @namespace   https://github.com/lzghzr/TampermonkeyJS
-// @version     0.0.3
+// @version     0.0.4
 // @author      lzghzr
 // @description B站直播心跳
 // @include     /^https?:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/
@@ -38,22 +38,27 @@ class RoomHeart {
             list.push(data);
         return list;
     }
-    isPatch = this.patchData.length === 0 ? 0 : 1;
+    get isPatch() { return this.patchData.length === 0 ? 0 : 1; }
     ua = W && W.navigator ? W.navigator.userAgent : '';
     csrf = this.getItem("bili_jct") || '';
     nextInterval = Math.floor(5) + Math.floor(Math.random() * (60 - 5));
-    heartbeatInterval;
+    heartBeatInterval;
     secretKey;
     secretRule;
     timestamp;
+    lastHeartbeatTimestamp = Date.now();
+    get watchTimeFromLastReport() {
+        const t = Math.ceil(((new Date).getTime() - this.lastHeartbeatTimestamp) / 1000);
+        return t < 0 ? 0 : t > this.heartBeatInterval ? this.heartBeatInterval : t;
+    }
     async getInfoByRoom(roomID) {
-        const getInfoByRoom = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=${roomID}`, {
+        const getInfoByRoom = await fetch(`//api.live.bilibili.com/room/v1/Room/get_info?room_id=${roomID}&from=room`, {
             mode: 'cors',
             credentials: 'include',
         }).then(res => res.json());
         if (getInfoByRoom.code === 0) {
-            const roomInfo = getInfoByRoom.data.room_info;
-            ({ area_id: this.areaID, parent_area_id: this.parentID, room_id: this.roomID } = roomInfo);
+            ;
+            ({ area_id: this.areaID, parent_area_id: this.parentID, room_id: this.roomID } = getInfoByRoom.data);
             this.e();
         }
         else
@@ -76,13 +81,30 @@ class RoomHeart {
         else
             console.error(GM_info.script.name, `房间 ${this.roomID} 心跳失败`);
     }
+    async savePatchData() {
+        if (this.seq > 6)
+            return;
+        const sypderData = {
+            id: JSON.stringify(this.id),
+            device: JSON.stringify(this.device),
+            ets: this.timestamp,
+            benchmark: this.secretKey,
+            time: this.watchTimeFromLastReport > this.heartBeatInterval ? this.heartBeatInterval : this.watchTimeFromLastReport,
+            ts: this.ts,
+            ua: this.ua,
+        };
+        const s = this.sypder(JSON.stringify(sypderData), this.secretRule);
+        const arg = Object.assign({ s }, sypderData);
+        patchData[this.roomID] = arg;
+        setTimeout(() => this.savePatchData(), 15 * 1000);
+    }
     async e() {
         const arg = {
             id: JSON.stringify(this.id),
             device: JSON.stringify(this.device),
             ts: this.ts,
-            is_patch: this.isPatch,
-            heart_beat: JSON.stringify(this.patchData),
+            is_patch: 0,
+            heart_beat: '[]',
             ua: this.ua,
         };
         const e = await fetch('//live-trace.bilibili.com/xlive/data-interface/v1/x25Kn/E', {
@@ -96,8 +118,8 @@ class RoomHeart {
         }).then(res => res.json());
         if (e.code === 0) {
             this.seq += 1;
-            ({ heartbeat_interval: this.heartbeatInterval, secret_key: this.secretKey, secret_rule: this.secretRule, timestamp: this.timestamp } = e.data);
-            setTimeout(() => this.x(), this.heartbeatInterval * 1000);
+            ({ heartbeat_interval: this.heartBeatInterval, secret_key: this.secretKey, secret_rule: this.secretRule, timestamp: this.timestamp } = e.data);
+            setTimeout(() => this.x(), this.heartBeatInterval * 1000);
         }
         else
             console.error(GM_info.script.name, `房间 ${this.roomID} 获取小心心失败`);
@@ -110,13 +132,14 @@ class RoomHeart {
             device: JSON.stringify(this.device),
             ets: this.timestamp,
             benchmark: this.secretKey,
-            time: this.heartbeatInterval,
+            time: this.heartBeatInterval,
             ts: this.ts,
             ua: this.ua,
         };
         const s = this.sypder(JSON.stringify(sypderData), this.secretRule);
         const arg = Object.assign({ s }, sypderData);
         patchData[this.roomID] = arg;
+        this.lastHeartbeatTimestamp = Date.now();
         const x = await fetch('//live-trace.bilibili.com/xlive/data-interface/v1/x25Kn/X', {
             headers: {
                 "content-type": "application/x-www-form-urlencoded",
@@ -128,8 +151,8 @@ class RoomHeart {
         }).then(res => res.json());
         if (x.code === 0) {
             this.seq += 1;
-            ({ heartbeat_interval: this.heartbeatInterval, secret_key: this.secretKey, secret_rule: this.secretRule, timestamp: this.timestamp } = x.data);
-            setTimeout(() => this.x(), this.heartbeatInterval * 1000);
+            ({ heartbeat_interval: this.heartBeatInterval, secret_key: this.secretKey, secret_rule: this.secretRule, timestamp: this.timestamp } = x.data);
+            setTimeout(() => this.x(), this.heartBeatInterval * 1000);
         }
         else
             console.error(GM_info.script.name, `房间 ${this.roomID} 小心心 心跳失败`);
@@ -190,14 +213,14 @@ class RoomHeart {
 }
 ;
 (async () => {
-    const bagList = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/gift/bag_list?t=${Date.now()}&room_id=${W.BilibiliLive.ROOMID}`, {
+    const bagList = await fetch(`//api.live.bilibili.com/xlive/web-room/v1/gift/bag_list?t=${Date.now()}&room_id=23058`, {
         mode: 'cors',
         credentials: 'include',
     }).then(res => res.json());
     if (bagList.code !== 0)
         return console.error(GM_info.script.name, '未获取到包裹列表');
     let giftNum = 0;
-    if (bagList.data.list.length > 0)
+    if (bagList.data.list != null && bagList.data.list.length > 0)
         for (const gift of bagList.data.list) {
             if (gift.gift_id === 30607) {
                 const expire = (gift.expire_at - Date.now() / 1000) / 60 / 60 / 24;
