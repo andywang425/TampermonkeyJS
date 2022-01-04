@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        BiliveHeart
 // @namespace   https://github.com/lzghzr/TampermonkeyJS
-// @version     0.0.4
+// @version     0.0.5
 // @author      lzghzr
 // @description B站直播心跳
 // @include     /^https?:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/
@@ -276,7 +276,7 @@ class RoomHeart {
     }
   if (giftNum >= 24) return console.error(GM_info.script.name, '已获取今日小心心')
 
-  const fetchMedal = async (pn = 1): Promise<Medal> => await fetch(`//api.live.bilibili.com/i/api/medal?page=${pn}&pageSize=10`, {
+  const fetchMedal = async (pn = 1): Promise<Medal> => await fetch(`//api.live.bilibili.com/xlive/app-ucenter/v1/user/GetMyMedals?page=${pn}&page_size=10`, {
     mode: 'cors',
     credentials: 'include',
   }).then(res => res.json())
@@ -284,15 +284,15 @@ class RoomHeart {
   if (medal.code !== 0) return console.error(GM_info.script.name, '未获取到勋章列表')
 
   const medalData = medal.data
-  const fansMedalList = medalData.fansMedalList
-  let totalpages = medalData.pageinfo?.totalpages
+  const fansMedalList = medalData.items
+  let totalpages = medalData.page_info?.total_page
 
   // 尽量一次性获取到 24 个
   if (totalpages > 1) {
     totalpages = totalpages > 3 ? 3 : totalpages
     for (let index = 2; index <= totalpages; index++) {
       const medalTemp = await fetchMedal(index)
-      fansMedalList.push(...medalTemp.data.fansMedalList)
+      fansMedalList.push(...medalTemp.data.items)
     }
   }
 
