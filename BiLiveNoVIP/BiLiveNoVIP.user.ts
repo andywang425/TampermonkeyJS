@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.5
+// @version     4.0.6
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -147,6 +147,41 @@ class NoVIP {
 .chat-item .user-name {
   color: #23ade5 !important;
 }`
+    if (config.menu.noGuardIcon.enable) cssText += `
+.chat-item.guard-danmaku .vip-icon {
+  margin-right: 4px !important;
+}
+.chat-item.guard-danmaku .admin-icon,
+.chat-item.guard-danmaku .anchor-icon,
+.chat-item.guard-danmaku .fans-medal-item-ctnr,
+.chat-item.guard-danmaku .guard-icon,
+.chat-item.guard-danmaku .title-label,
+.chat-item.guard-danmaku .user-level-icon,
+.chat-item.guard-danmaku .user-lpl-logo {
+  margin-right: 5px !important;
+}
+.chat-item.guard-level-1,
+.chat-item.guard-level-2 {
+  margin: 0 !important;
+  padding: 4px 5px !important;
+}
+.chat-item.chat-colorful-bubble {
+  background-color: rgba(248, 248, 248, 0) !important;
+  border-radius: 0px !important;
+  display: block !important;
+  margin: 0 !important;
+}
+#welcome-area-bottom-vm,
+.chat-item.common-danmuku-msg,
+.chat-item.guard-buy,
+.chat-item.welcome-guard,
+.chat-item .guard-icon,
+.chat-item.guard-level-1:after,
+.chat-item.guard-level-2:after,
+.chat-item.guard-level-1:before,
+.chat-item.guard-level-2:before {
+  display: none !important;
+}`
     if (config.menu.noGiftMsg.enable) {
       height -= 32
       cssText += `
@@ -255,49 +290,14 @@ class NoVIP {
     if (config.menu.noEmoticons.enable) cssText += `
 #chat-control-panel-vm .emoticons-panel,
 .chat-item.chat-emoticon {
-display: none !important;
+  display: none !important;
 }`
     if (config.menu.noEmotDanmaku.enable) cssText += `
 .bilibili-danmaku > img {
-display: none !important;
+  display: none !important;
 }`
     if (config.menu.noKanBanMusume.enable) cssText += `
 #my-dear-haruna-vm {
-  display: none !important;
-}`
-    if (config.menu.noGuardIcon.enable) cssText += `
-.chat-item.guard-danmaku .vip-icon {
-  margin-right: 4px !important;
-}
-.chat-item.guard-danmaku .admin-icon,
-.chat-item.guard-danmaku .anchor-icon,
-.chat-item.guard-danmaku .fans-medal-item-ctnr,
-.chat-item.guard-danmaku .guard-icon,
-.chat-item.guard-danmaku .title-label,
-.chat-item.guard-danmaku .user-level-icon,
-.chat-item.guard-danmaku .user-lpl-logo {
-  margin-right: 5px !important;
-}
-.chat-item.guard-level-1,
-.chat-item.guard-level-2 {
-  margin: 0 !important;
-  padding: 4px 5px !important;
-}
-.chat-item.chat-colorful-bubble {
-  background-color: rgba(248, 248, 248, 0) !important;
-  border-radius: 0px !important;
-  display: block !important;
-  margin: 0 !important;
-}
-#welcome-area-bottom-vm,
-.chat-item.common-danmuku-msg,
-.chat-item.guard-buy,
-.chat-item.welcome-guard,
-.chat-item .guard-icon,
-.chat-item.guard-level-1:after,
-.chat-item.guard-level-2:after,
-.chat-item.guard-level-1:before,
-.chat-item.guard-level-2:before {
   display: none !important;
 }`
     if (config.menu.noMedalIcon.enable) cssText += `
@@ -315,7 +315,9 @@ body[style*="overflow: hidden;"] {
 #anchor-guest-box-id,
 .anchor-lottery-entry,
 #player-effect-vm,
-#chat-draw-area-vm {
+#chat-draw-area-vm,
+.popular-main .lottery,
+#red-envelope-entry-vm {
   display: none !important;
 }`
     cssText += `
@@ -434,7 +436,7 @@ body[style*="overflow: hidden;"] {
 
 // 加载设置
 const defaultConfig: config = {
-  version: 1639055746554,
+  version: 1642073216126,
   menu: {
     noGiftMsg: {
       name: '屏蔽全部礼物及广播',
