@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.6
+// @version     4.0.7
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -144,6 +144,7 @@ class NoVIP {
     let height = 62
     //css内容
     let cssText = `
+/* 统一用户名颜色 */
 .chat-item .user-name {
   color: #23ade5 !important;
 }`
@@ -183,8 +184,10 @@ class NoVIP {
   display: none !important;
 }`
     if (config.menu.noGiftMsg.enable) {
+      // 底部小礼物, 调整高度
       height -= 32
       cssText += `
+/* 底部小礼物, 调整高度 */
 .chat-history-list.with-penury-gift {
   height: 100% !important;
 }
@@ -226,6 +229,7 @@ class NoVIP {
 }`
     }
     if (config.menu.noSuperChat.enable) cssText += `
+/* 调整 SuperChat 聊天框 */
 .chat-item.superChat-card-detail {
   margin-left: unset !important;
   margin-right: unset !important;
@@ -266,6 +270,10 @@ class NoVIP {
   white-space: unset !important;
   width: unset !important;
 }
+/* 为 SuperChat 用户名添加 : */
+.chat-item.superChat-card-detail .name:after {
+  content: ' : ';
+}
 .chat-item .card-item-middle-bottom {
   background-color: unset !important;
   display: unset !important;
@@ -289,8 +297,11 @@ class NoVIP {
 }`
     if (config.menu.noEmoticons.enable) cssText += `
 #chat-control-panel-vm .emoticons-panel,
-.chat-item.chat-emoticon {
+.chat-item.chat-emoticon .danmaku-content.emoticon > img {
   display: none !important;
+}
+.chat-item.chat-emoticon .danmaku-content.emoticon > span {
+  display: unset !important;
 }`
     if (config.menu.noEmotDanmaku.enable) cssText += `
 .bilibili-danmaku > img {
