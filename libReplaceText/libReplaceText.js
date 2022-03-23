@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        libReplaceText
 // @namespace   https://github.com/lzghzr/TampermonkeyJS
-// @version     0.0.7
+// @version     0.0.8
 // @author      lzghzr
 // @description 替换网页内文本, 达到本地化的目的
 // @match       *://*/*
@@ -11,11 +11,6 @@
 // ==/UserScript==
 class ReplaceText {
     constructor(i18n, mode = 'equal') {
-        this.W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow;
-        this.done = new Set();
-        this.alert = this.W.alert.bind(this.W);
-        this.confirm = this.W.confirm.bind(this.W);
-        this.prompt = this.W.prompt.bind(this.W);
         const i18nMap = new Map(i18n);
         const i18nArr = i18n.map(value => value[0]);
         if (mode === 'regexp') {
@@ -48,6 +43,12 @@ class ReplaceText {
         this.replaceAlert();
         this.replaceObserver();
     }
+    W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow;
+    done = new Set();
+    alert = this.W.alert.bind(this.W);
+    confirm = this.W.confirm.bind(this.W);
+    prompt = this.W.prompt.bind(this.W);
+    textReplace;
     replaceAlert() {
         this.W.alert = (message) => this.alert(this.textReplace(message));
         this.W.confirm = (message) => this.confirm(this.textReplace(message));
@@ -68,19 +69,27 @@ class ReplaceText {
         }
     }
     replaceObserver() {
-        const bodyObserver = new MutationObserver(mutations => {
+        const observerOptions = { attributes: true, characterData: true, childList: true, subtree: true };
+        const observer = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
                 if (mutation.type === 'attributes' || mutation.type === 'characterData')
                     this.replaceNode(mutation.target, true);
-                else if (mutation.type === 'childList') {
+                else if (mutation.type === 'childList')
                     mutation.addedNodes.forEach(addedNode => this.replaceNode(addedNode));
-                }
             });
         });
         document.addEventListener('readystatechange', () => {
-            bodyObserver.observe(document.body, { attributes: true, characterData: true, childList: true, subtree: true });
+            observer.observe(document.body, observerOptions);
             this.replaceNode(document.body);
         }, { capture: true, once: true });
+        Element.prototype.attachShadow = new Proxy(Element.prototype.attachShadow, {
+            apply: function (target, _this, args) {
+                const shadowRoot = Reflect.apply(target, _this, args);
+                if (shadowRoot !== null)
+                    observer.observe(shadowRoot, observerOptions);
+                return shadowRoot;
+            }
+        });
     }
     getReplaceList(node, self = false) {
         const list = {
@@ -89,7 +98,7 @@ class ReplaceText {
             title: new Set(),
             value: new Set(),
         };
-        const nodeList = self ? [node] : this.nodeForEach(node);
+        const nodeList = self ? [node] : this.flattenNode(node);
         nodeList.forEach(node => {
             if (node.parentElement instanceof HTMLScriptElement || node.parentElement instanceof HTMLStyleElement)
                 return;
@@ -104,11 +113,12 @@ class ReplaceText {
         });
         return list;
     }
-    nodeForEach(node) {
-        const list = [];
-        list.push(node);
-        if (node.hasChildNodes())
-            node.childNodes.forEach(child => list.push(...this.nodeForEach(child)));
-        return list;
+    flattenNode(node) {
+        const nodeList = [];
+        const treeWalker = document.createTreeWalker(node, NodeFilter.SHOW_ALL);
+        do {
+            nodeList.push(treeWalker.currentNode);
+        } while (treeWalker.nextNode());
+        return nodeList;
     }
 }

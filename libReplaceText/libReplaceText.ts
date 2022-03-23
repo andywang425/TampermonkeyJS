@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        libReplaceText
 // @namespace   https://github.com/lzghzr/TampermonkeyJS
-// @version     0.0.7
+// @version     0.0.8
 // @author      lzghzr
 // @description 替换网页内文本, 达到本地化的目的
 // @match       *://*/*
@@ -93,7 +93,7 @@ class ReplaceText {
    * @param {boolean} [self=false]
    * @memberof ReplaceText
    */
-  public replaceNode(node: Node, self = false) {
+  public replaceNode(node: Node, self: boolean = false) {
     const list = this.getReplaceList(node, self)
     for (let index in list) {
       // @ts-ignore it's too difficult
@@ -114,20 +114,29 @@ class ReplaceText {
    */
   public replaceObserver() {
     // 出于功能不需要太高实时性, 使用 MutationObserver 而不是 MutationEvents
-    const bodyObserver = new MutationObserver(mutations => {
+    const observerOptions: MutationObserverInit = { attributes: true, characterData: true, childList: true, subtree: true }
+    const observer = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
         if (mutation.type === 'attributes' || mutation.type === 'characterData')
           this.replaceNode(mutation.target, true)
-        else if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach(addedNode => this.replaceNode(addedNode))
-        }
+        else if (mutation.type === 'childList')
+          mutation.addedNodes.forEach(addedNode =>
+            this.replaceNode(addedNode))
       })
     })
     // 使用 document.onreadystatechange 可以更早的替换 body
     document.addEventListener('readystatechange', () => {
-      bodyObserver.observe(document.body, { attributes: true, characterData: true, childList: true, subtree: true })
+      observer.observe(document.body, observerOptions)
       this.replaceNode(document.body)
     }, { capture: true, once: true })
+    // 监听 shadowRoot
+    Element.prototype.attachShadow = new Proxy(Element.prototype.attachShadow, {
+      apply: function (target, _this, args) {
+        const shadowRoot = Reflect.apply(target, _this, args)
+        if (shadowRoot !== null) observer.observe(shadowRoot, observerOptions)
+        return shadowRoot
+      }
+    })
   }
   /**
    * 深度遍历节点
@@ -137,14 +146,14 @@ class ReplaceText {
    * @returns {replaceList}
    * @memberof ReplaceText
    */
-  public getReplaceList(node: Node, self = false): replaceList {
+  public getReplaceList(node: Node, self: boolean = false): replaceList {
     const list: replaceList = {
       data: new Set<Text>(),
       placeholder: new Set<HTMLInputElement | HTMLTextAreaElement>(),
       title: new Set<HTMLElement>(),
       value: new Set<HTMLInputElement>(),
     }
-    const nodeList = self ? [node] : this.nodeForEach(node)
+    const nodeList = self ? [node] : this.flattenNode(node)
     nodeList.forEach(node => {
       // 排除特殊标签
       if (node.parentElement instanceof HTMLScriptElement || node.parentElement instanceof HTMLStyleElement) return
@@ -158,19 +167,27 @@ class ReplaceText {
     return list
   }
   /**
-   * 深度遍历节点, 返回所有节点
+   * 返回所有节点
    *
    * @param {Node} node
    * @returns {Node[]}
    * @memberof ReplaceText
    */
-  public nodeForEach(node: Node): Node[] {
-    const list: Node[] = []
-    list.push(node)
-    if (node.hasChildNodes())
-      node.childNodes.forEach(child => list.push(...this.nodeForEach(child)))
-    return list
+  public flattenNode(node: Node): Node[] {
+    const nodeList: Node[] = []
+    const treeWalker = document.createTreeWalker(
+      node,
+      NodeFilter.SHOW_ALL
+    )
+    do {
+      // 目前不需要
+      // if (treeWalker.currentNode instanceof Element && treeWalker.currentNode.shadowRoot !== null)
+      //   nodeList.push(...this.flattenNode(treeWalker.currentNode.shadowRoot))
+      nodeList.push(treeWalker.currentNode)
+    }
+    while (treeWalker.nextNode())
+    return nodeList
   }
 }
 
-export default ReplaceText 
+export default ReplaceText
