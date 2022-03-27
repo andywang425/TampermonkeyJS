@@ -13,12 +13,13 @@
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow;
 const patchData = {};
 class RoomHeart {
-    constructor(roomID) {
-        this.getInfoByRoom(roomID);
+    constructor(inputRoomID) {
+        this.inputRoomID = inputRoomID;
     }
     areaID;
     parentID;
     seq = 0;
+    inputRoomID;
     roomID;
     get id() {
         return [this.parentID, this.areaID, this.seq, this.roomID];
@@ -51,7 +52,12 @@ class RoomHeart {
         const t = Math.ceil(((new Date).getTime() - this.lastHeartbeatTimestamp) / 1000);
         return t < 0 ? 0 : t > this.heartBeatInterval ? this.heartBeatInterval : t;
     }
+    async start() {
+        return await this.getInfoByRoom(this.inputRoomID);
+    }
     async getInfoByRoom(roomID) {
+        if (!roomID)
+            return Promise.resolve(false);
         const getInfoByRoom = await fetch(`//api.live.bilibili.com/room/v1/Room/get_info?room_id=${roomID}&from=room`, {
             mode: 'cors',
             credentials: 'include',
@@ -59,10 +65,15 @@ class RoomHeart {
         if (getInfoByRoom.code === 0) {
             ;
             ({ area_id: this.areaID, parent_area_id: this.parentID, room_id: this.roomID } = getInfoByRoom.data);
+            if (!this.areaID || !this.parentID)
+                return Promise.resolve(false);
             this.e();
+            return Promise.resolve(true);
         }
-        else
+        else {
             console.error(GM_info.script.name, `未获取到房间 ${roomID} 信息`);
+            return Promise.resolve(false);
+        }
     }
     async webHeartBeat() {
         if (this.seq > 6)
@@ -254,9 +265,11 @@ class RoomHeart {
         for (const funsMedalData of fansMedalList) {
             if (count >= control)
                 break;
-            new RoomHeart(funsMedalData.roomid);
+            await new RoomHeart(funsMedalData.roomid).start().then(heartStatus => {
+                if (heartStatus)
+                    count++;
+            });
             await Sleep(1000);
-            count++;
         }
         await Sleep(6 * 60 * 1000);
     }

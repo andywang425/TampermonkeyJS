@@ -19,13 +19,14 @@ const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 const patchData: Record<number, patchData> = {}
 
 class RoomHeart {
-  constructor(roomID: number) {
-    this.getInfoByRoom(roomID)
+  constructor(inputRoomID: number) {
+    this.inputRoomID = inputRoomID
   }
   // 获得id，需JSON.stringify
   private areaID!: number
   private parentID!: number
   private seq = 0
+  private inputRoomID!: number
   private roomID!: number
 
   private get id(): number[] {
@@ -68,25 +69,44 @@ class RoomHeart {
     const t = Math.ceil(((new Date).getTime() - this.lastHeartbeatTimestamp) / 1000)
     return t < 0 ? 0 : t > this.heartBeatInterval ? this.heartBeatInterval : t
   }
+
+  /**
+   * 开始心跳
+   * 
+   * @public
+   * @memberof RoomHeart
+   * @returns {Promise<'Boolean>}
+   */
+  public async start(): Promise<Boolean> {
+    return await this.getInfoByRoom(this.inputRoomID)
+  }
+
   /**
    * 获取房间信息，可以用window.BilibiliLive代替，但需要时间加载
    *
    * @private
    * @param {number} roomID
-   * @returns
+   * @returns {Promise<Boolean>}
    * @memberof RoomHeart
    */
-  private async getInfoByRoom(roomID: number) {
+  private async getInfoByRoom(roomID: number): Promise<Boolean> {
+    if (!roomID) return Promise.resolve(false)
     const getInfoByRoom: RoomInfo = await fetch(`//api.live.bilibili.com/room/v1/Room/get_info?room_id=${roomID}&from=room`, {
       mode: 'cors',
       credentials: 'include',
     }).then(res => res.json())
     if (getInfoByRoom.code === 0) {
       ; ({ area_id: this.areaID, parent_area_id: this.parentID, room_id: this.roomID } = getInfoByRoom.data)
+      // 跳过没有分区数据的房间
+      if (!this.areaID || !this.parentID) return Promise.resolve(false)
       // this.webHeartBeat()
       this.e()
+      return Promise.resolve(true)
     }
-    else console.error(GM_info.script.name, `未获取到房间 ${roomID} 信息`)
+    else {
+      console.error(GM_info.script.name, `未获取到房间 ${roomID} 信息`)
+      return Promise.resolve(false)
+    }
   }
   /**
    * 暂时无用
@@ -302,9 +322,10 @@ class RoomHeart {
     let count = 0
     for (const funsMedalData of fansMedalList) {
       if (count >= control) break
-      new RoomHeart(funsMedalData.roomid)
+      await new RoomHeart(funsMedalData.roomid).start().then(heartStatus => {
+        if (heartStatus) count++
+      })
       await Sleep(1000)
-      count++
     }
     await Sleep(6 * 60 * 1000)
   }
