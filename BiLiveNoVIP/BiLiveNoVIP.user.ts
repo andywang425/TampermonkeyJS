@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.7
+// @version     4.0.8
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -10,7 +10,7 @@
 // @match       https://www.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/live/*
 // @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@45f5c76d2f49a16c1cdaae78397779ee6fd72e8e/bliveproxy/bliveproxy.js
-// @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@25127e6f47da91603645f9ec3a7da65ecb1180cf/Ajax-hook/Ajax-hook.js
+// @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@fcb1c5db40d32f877d49c0ed2e41d57bd17ad96f/ajax-proxy/ajax-proxy.js
 // @license     MIT
 // @grant       GM_addStyle
 // @grant       GM_getValue
@@ -540,31 +540,36 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
     if (config.menu.noRoundPlay.enable)
       Reflect.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', {})
     // 拦截xhr
-    ah.proxy({
-      onRequest: (XHRconfig, handler) => {
+    ajaxProxy.proxyAjax({
+      open: function (args, _xhr) {
         // 隐身入场
-        if (config.menu.invisible.enable && XHRconfig.url.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser'))
-          XHRconfig.url = XHRconfig.url.replace(/room_id=\d+/, 'room_id=273022')
-        handler.next(XHRconfig)
+        if (config.menu.invisible.enable && args[1].includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser'))
+          return (args[1] = args[1].replace(/room_id=\d+/, 'room_id=273022')) && args
       },
-      onResponse: (response, handler) => {
-        // 屏蔽房间皮肤
-        if (config.menu.noRoomSkin.enable && response.config.url.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom')) {
-          const json = JSON.parse(response.response)
-          json.data.skin_info = undefined
-          response.response = JSON.stringify(json)
+      responseText: {
+        getter: function (value, xhr) {
+          // 屏蔽房间皮肤
+          if (config.menu.noRoomSkin.enable && xhr.responseURL.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom')) {
+            const json = JSON.parse(value)
+            json.data.skin_info = undefined
+            return JSON.stringify(json)
+          }
+          // 屏蔽视频轮播
+          if (config.menu.noRoundPlay.enable && xhr.responseURL.includes('//api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo'))
+            return value.replace('"live_status":2', '"live_status":0')
+          // 隐身入场
+          if (config.menu.invisible.enable && xhr.responseURL.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser'))
+            return value.replace('"is_room_admin":false', '"is_room_admin":true')
+          return value
         }
-        // 屏蔽视频轮播
-        if (config.menu.noRoundPlay.enable) {
-          if (response.config.url.includes('//api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo'))
-            response.response = response.response.replace('"live_status":2', '"live_status":0')
-          if (response.config.url.includes('//api.live.bilibili.com/live/getRoundPlayVideo'))
-            response.status = 403
+      },
+      status: {
+        getter: function (value, xhr) {
+          // 屏蔽视频轮播
+          if (config.menu.noRoundPlay.enable && xhr.responseURL.includes('//api.live.bilibili.com/live/getRoundPlayVideo'))
+            return 403
+          return value
         }
-        // 隐身入场
-        if (config.menu.invisible.enable && response.config.url.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser'))
-          response.response = response.response.replace('"is_room_admin":false', '"is_room_admin":true')
-        handler.next(response)
       }
     })
     // 拦截fetch
