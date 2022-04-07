@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.9
+// @version     4.0.10
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -316,6 +316,11 @@ body[style*="overflow: hidden;"] {
 #red-envelope-entry-vm {
   display: none !important;
 }`;
+        if (config.menu.noDanmakuColor.enable)
+            cssText += `
+.bilibili-danmaku {
+  color: #ffffff !important;
+}`;
         cssText += `
 .chat-history-list.with-penury-gift.with-brush-prompt {
   height: calc(100% - ${height}px) !important;
@@ -404,7 +409,24 @@ body[style*="overflow: hidden;"] {
   font-size: 13px;
   vertical-align: top;
 }
-/*隐藏网页全屏榜单*/
+/* 多行菜单 */
+.border-box.dialog-ctnr.common-popup-wrap.top-left[style*="width: 200px;"] {
+  width: 270px !important;
+}
+.block-effect-ctnr .item {
+  float: left;
+}
+.block-effect-ctnr .item .cb-icon {
+  left: unset !important;
+  margin-left: -6px;
+}
+.block-effect-ctnr .item label {
+  width: 84px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 隐藏网页全屏榜单 */
 .player-full-win .rank-list-section {
   display: none !important;
 }
@@ -414,7 +436,7 @@ body[style*="overflow: hidden;"] {
     }
 }
 const defaultConfig = {
-    version: 1642073216126,
+    version: 1649345072816,
     menu: {
         noGiftMsg: {
             name: '屏蔽全部礼物及广播',
@@ -462,6 +484,10 @@ const defaultConfig = {
         },
         noBBDanmaku: {
             name: '屏蔽刷屏弹幕',
+            enable: false
+        },
+        noDanmakuColor: {
+            name: '屏蔽弹幕颜色',
             enable: false
         },
         noActivityPlat: {
