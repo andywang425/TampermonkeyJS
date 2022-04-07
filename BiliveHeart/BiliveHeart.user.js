@@ -13,13 +13,12 @@
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow;
 const patchData = {};
 class RoomHeart {
-    constructor(inputRoomID) {
-        this.inputRoomID = inputRoomID;
+    constructor(roomID) {
+        this.roomID = roomID;
     }
     areaID;
     parentID;
     seq = 0;
-    inputRoomID;
     roomID;
     get id() {
         return [this.parentID, this.areaID, this.seq, this.roomID];
@@ -52,27 +51,27 @@ class RoomHeart {
         const t = Math.ceil(((new Date).getTime() - this.lastHeartbeatTimestamp) / 1000);
         return t < 0 ? 0 : t > this.heartBeatInterval ? this.heartBeatInterval : t;
     }
-    async start() {
-        return await this.getInfoByRoom(this.inputRoomID);
+    start() {
+        return this.getInfoByRoom();
     }
-    async getInfoByRoom(roomID) {
-        if (!roomID)
-            return Promise.resolve(false);
-        const getInfoByRoom = await fetch(`//api.live.bilibili.com/room/v1/Room/get_info?room_id=${roomID}&from=room`, {
+    async getInfoByRoom() {
+        if (this.roomID === 0)
+            return false;
+        const getInfoByRoom = await fetch(`//api.live.bilibili.com/room/v1/Room/get_info?room_id=${this.roomID}&from=room`, {
             mode: 'cors',
             credentials: 'include',
         }).then(res => res.json());
         if (getInfoByRoom.code === 0) {
             ;
             ({ area_id: this.areaID, parent_area_id: this.parentID, room_id: this.roomID } = getInfoByRoom.data);
-            if (!this.areaID || !this.parentID)
-                return Promise.resolve(false);
+            if (this.areaID === 0 || this.parentID === 0)
+                return false;
             this.e();
-            return Promise.resolve(true);
+            return true;
         }
         else {
-            console.error(GM_info.script.name, `未获取到房间 ${roomID} 信息`);
-            return Promise.resolve(false);
+            console.error(GM_info.script.name, `未获取到房间 ${this.roomID} 信息`);
+            return false;
         }
     }
     async webHeartBeat() {
@@ -265,10 +264,8 @@ class RoomHeart {
         for (const funsMedalData of fansMedalList) {
             if (count >= control)
                 break;
-            await new RoomHeart(funsMedalData.roomid).start().then(heartStatus => {
-                if (heartStatus)
-                    count++;
-            });
+            if (await new RoomHeart(funsMedalData.roomid).start())
+                count++;
             await Sleep(1000);
         }
         await Sleep(6 * 60 * 1000);
