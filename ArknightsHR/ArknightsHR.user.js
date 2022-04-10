@@ -1,3 +1,15 @@
+// ==UserScript==
+// @name        明日方舟公开招募
+// @namespace   https://github.com/lzghzr/TampermonkeyJS
+// @version     0.0.1
+// @author      lzghzr
+// @description 为Wiki添加OCR
+// @supportURL  https://github.com/lzghzr/TampermonkeyJS/issues
+// @match       https://prts.wiki/w/%E5%B9%B2%E5%91%98%E4%B8%80%E8%A7%88
+// @license     MIT
+// @grant       none
+// @run-at      document-end
+// ==/UserScript==
 "use strict";
 const Fingerprints = {
     '2': {
