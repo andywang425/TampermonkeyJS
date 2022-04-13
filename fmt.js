@@ -27,7 +27,6 @@ fs.readdir('./', (error, files) => {
   })
 })
 function GMheads(tsFlie, jsFlie) {
-  let ok = 0
   const header = []
   const script = []
   // 写入js
@@ -37,29 +36,33 @@ function GMheads(tsFlie, jsFlie) {
       else console.error(error)
     })
   }
-  // 读取ts
-  const tsRL = readline.createInterface({
-    input: fs.createReadStream(tsFlie),
-    crlfDelay: Infinity
-  })
-  tsRL.on('line', line => {
-    header.push(line)
-    if (line === '// ==/UserScript==') {
-      tsRL.removeAllListeners()
-      ok++
-      if (ok === 2) writeJS()
-    }
-  })
   // 读取js
   const jsRL = readline.createInterface({
     input: fs.createReadStream(jsFlie),
     crlfDelay: Infinity
   })
   jsRL.on('line', line => {
-    if (!line.startsWith('import') && !line.startsWith('export')) script.push(line)
+    if (line === '// ==UserScript==') {
+      jsRL.removeAllListeners()
+      jsRL.close()
+      console.log(jsFlie, 'ignore')
+    }
+    if (!line.startsWith('import') && !line.startsWith('export'))
+      script.push(line.replace(/^((?:  )+)\1/, '$1'))
   })
   jsRL.on('close', () => {
-    ok++
-    if (ok === 2) writeJS()
+    // 读取ts
+    const tsRL = readline.createInterface({
+      input: fs.createReadStream(tsFlie),
+      crlfDelay: Infinity
+    })
+    tsRL.on('line', line => {
+      header.push(line)
+      if (line === '// ==/UserScript==') {
+        tsRL.removeAllListeners()
+        tsRL.close()
+        writeJS()
+      }
+    })
   })
 }

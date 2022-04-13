@@ -46,3 +46,13 @@ configs/*.json
 # Build flies
 build
 .vscode
+package-lock.json
+tsconfig.tsbuildinfo
+
+#deprecated
+ACLiveNoVIP
+BiliDraw
+BiliveClientHeart
+Simple2Complete
+SteamUserReviewAward
+youdaoGWZS
