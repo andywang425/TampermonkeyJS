@@ -10,8 +10,8 @@
 // @grant       GM_xmlhttpRequest
 // @run-at      document-start
 // ==/UserScript==
-/// <reference path="libBilibiliToken.d.ts" />
 import { GM_xmlhttpRequest } from '../@types/tm_f'
+import { XHRheaders, authCode, confirm, pollData, poll } from './libBilibiliToken.d'
 
 /**
  * 由B站cookie获取token

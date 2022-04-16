@@ -1,4 +1,4 @@
-declare function md5(string: string, key?: string, raw?: boolean): string
+type md5 = (string: string, key?: string, raw?: boolean) => string
 type XHRheaders = Record<string, string>
 /**
  * 二维码
@@ -46,3 +46,4 @@ interface pollData {
   refresh_token: string
   expires_in: number
 }
+export { md5, XHRheaders, authCode, confirm, pollData, poll }
