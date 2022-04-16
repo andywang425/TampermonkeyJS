@@ -8,7 +8,7 @@
 // @license     MIT
 // @run-at      document-start
 // ==/UserScript==
-/// <reference path="libWasmHash.d.ts" />
+import { InitOutput } from 'libWasmHash.d'
 /**
  * 
  * MIT license

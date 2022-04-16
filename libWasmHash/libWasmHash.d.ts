@@ -6,3 +6,4 @@ interface InitOutput {
   readonly __wbindgen_realloc: (a: number, b: number, c: number) => number
   readonly __wbindgen_free: (a: number, b: number) => void
 }
+export { InitOutput }
