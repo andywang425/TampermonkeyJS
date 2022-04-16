@@ -12,6 +12,7 @@
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
+import { ajaxProxy } from "./FuckBaiduPan"
 
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 //@ts-ignore
