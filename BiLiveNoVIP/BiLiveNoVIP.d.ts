@@ -1,8 +1,12 @@
-declare class ajaxProxy {
+export class ajaxProxy {
   static proxyAjax: (proxyMap: ProxyMap) => XMLHttpRequest
   static unProxyAjax: () => void
 }
-// ProxyMap
+declare global {
+  interface Window {
+    webpackChunklive_room: unknown[]
+  }
+}
 // 设置信息
 interface config {
   version: number
@@ -77,3 +81,4 @@ interface playerType {
 //     }
 //   }
 // })
+export { config }

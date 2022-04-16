@@ -17,8 +17,8 @@
 // @grant       GM_setValue
 // @run-at      document-start
 // ==/UserScript==
-/// <reference path='BiLiveNoVIP.d.ts' />
 import { GM_addStyle, GM_getValue, GM_setValue } from '../@types/tm_f'
+import { config, ajaxProxy } from './BiLiveNoVIP'
 
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 
