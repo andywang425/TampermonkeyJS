@@ -10,6 +10,7 @@
 // @grant       none
 // @run-at      document-start
 // ==/UserScript==
+export { }
 
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 
@@ -26,6 +27,7 @@ function dec(x: string) {
   for (let i = 0; i < 6; i++) r += tr[x[s[i]]] * 58 ** i
   return (r - add) ^ xor
 }
+// @ts-ignore
 function enc(x: string) {
   let y = Number.parseInt(x)
   y = (y ^ xor) + add
