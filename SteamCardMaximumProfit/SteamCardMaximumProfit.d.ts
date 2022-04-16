@@ -1,16 +1,20 @@
-interface Window {
-  iActiveSelectView: number
-  g_rgWalletInfo: rgWalletInfo
-  g_sessionID: string
-  CalculateFeeAmount(amount: number, publisherFee: string): feeAmount
-  GetCurrencyCode(currencyId: number): string
-  GetMarketHashName(rgDescriptionData: description): string
-  GetPriceValueAsInt(strAmount: string): number
-  v_currencyformat(valueInCents: number, currencyCode: string): string
+declare global {
+  interface Window {
+    iActiveSelectView: number
+    g_rgWalletInfo: rgWalletInfo
+    g_sessionID: string
+    CalculateFeeAmount(amount: number, publisherFee: string): feeAmount
+    GetCurrencyCode(currencyId: number): string
+    GetMarketHashName(rgDescriptionData: description): string
+    GetPriceValueAsInt(strAmount: string): number
+    v_currencyformat(valueInCents: number, currencyCode: string): string
+  }
 }
-interface Node {
-  rgItem: rgItem
-  wrappedJSObject: wrappedJSObject
+declare global {
+  interface Node {
+    rgItem: rgItem
+    wrappedJSObject: wrappedJSObject
+  }
 }
 // 兼容火狐
 interface wrappedJSObject {
@@ -93,3 +97,4 @@ interface sellitem {
   needs_email_confirmation: boolean
   email_domain: string
 }
+export { baiduExch, priceoverview, itemordershistogram, sellitem, rgItem }

@@ -14,8 +14,8 @@
 // @run-at      document-end
 // @noframes
 // ==/UserScript==
-/// <reference path="SteamCardMaximumProfit.d.ts" />
 import { GM_addStyle, GM_xmlhttpRequest } from '../@types/tm_f'
+import { baiduExch, priceoverview, itemordershistogram, sellitem, rgItem } from './SteamCardMaximumProfit'
 
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 let gInputUSDCNY: HTMLInputElement
@@ -153,7 +153,7 @@ async function addUI() {
     url: `https://sp0.baidu.com/8aQDcjqpAAV3otqbppnN2DJv/api.php?query=1%E7%BE%8E%E5%85%83%E7%AD%89%E4%BA%8E%E5%A4%9A%E5%B0%91%E4%BA%BA%E6%B0%91%E5%B8%81&resource_id=6017&t=${Date.now()}&ie=utf8&oe=utf8&format=json&tn=baidu`,
     responseType: 'json',
   })
-  if (baiduExch !== undefined && baiduExch.response.status === 200) gInputUSDCNY.value = baiduExch.body.data[0].number2
+  if (baiduExch?.body?.data[0] !== undefined && baiduExch.response.status === 200) gInputUSDCNY.value = baiduExch.body.data[0].number2
 }
 /**
  * 获取美元区价格
@@ -189,7 +189,7 @@ async function getPriceOverview(itemInfo: ItemInfo): Promise<'error' | ItemInfo>
       url: `/market/itemordershistogram/?country=US&language=english&currency=1&item_nameid=${marketLoadOrderSpread[1]}&two_factor=0`,
       responseType: 'json'
     })
-    if (itemordershistogram === undefined || itemordershistogram.response.status !== 200
+    if (itemordershistogram?.body?.sell_order_graph[0] === undefined || itemordershistogram.response.status !== 200
       || itemordershistogram.body.success !== 1) return stop()
     itemInfo.lowestPrice = ' ' + itemordershistogram.body.sell_order_graph[0][0]
     return calculatePrice(itemInfo)
