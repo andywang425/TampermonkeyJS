@@ -10,8 +10,7 @@
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
-/// <reference path="SteamItemGoo.d.ts" />
-export { }
+import { gooValueInfo } from './SteamItemGoo'
 
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 const gooValue = JSON.stringify(W.g_rgAssets).match(/GetGooValue\(.*?, (?<appid>\d+), (?<item_type>\d+), (?<border_color>\d+)/)
