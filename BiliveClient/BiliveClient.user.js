@@ -15,27 +15,27 @@
 // ==/UserScript==
 "use strict";
 const geetest = {
-    validate: '',
-    challenge: '',
-    seccode: '',
+  validate: '',
+  challenge: '',
+  seccode: '',
 };
 if (self !== top && location.hostname === 'passport.bilibili.com') {
-    const bodyObserver = new MutationObserver(mutations => {
-        mutations.forEach(mutation => {
-            if (mutation.attributeName === 'value' && mutation.target instanceof HTMLInputElement)
-                if (mutation.target.className === 'geetest_validate')
-                    geetest.validate = mutation.target.value;
-                else if (mutation.target.className === 'geetest_challenge')
-                    geetest.challenge = mutation.target.value;
-                else if (mutation.target.className === 'geetest_seccode')
-                    geetest.seccode = mutation.target.value;
-            if (geetest.validate !== '' && geetest.challenge !== '' && geetest.seccode !== '') {
-                top.postMessage(`${geetest.validate}&challenge=${geetest.challenge}&seccode=${encodeURIComponent(geetest.seccode)}`, '*');
-                geetest.validate = '';
-                geetest.challenge = '';
-                geetest.seccode = '';
-            }
-        });
+  const bodyObserver = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      if (mutation.attributeName === 'value' && mutation.target instanceof HTMLInputElement)
+        if (mutation.target.className === 'geetest_validate')
+          geetest.validate = mutation.target.value;
+        else if (mutation.target.className === 'geetest_challenge')
+          geetest.challenge = mutation.target.value;
+        else if (mutation.target.className === 'geetest_seccode')
+          geetest.seccode = mutation.target.value;
+      if (geetest.validate !== '' && geetest.challenge !== '' && geetest.seccode !== '') {
+        top.postMessage(`${geetest.validate}&challenge=${geetest.challenge}&seccode=${encodeURIComponent(geetest.seccode)}`, '*');
+        geetest.validate = '';
+        geetest.challenge = '';
+        geetest.seccode = '';
+      }
     });
-    bodyObserver.observe(document.body, { attributes: true, subtree: true });
+  });
+  bodyObserver.observe(document.body, { attributes: true, subtree: true });
 }
