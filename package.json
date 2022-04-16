@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run build:tsc && npm run fmt",
-    "build:tsc": "tsc || exit 0",
+    "build:tsc": "tsc -p tsconfig.json || exit 0",
     "fmt": "node fmt.js"
   },
   "author": "lzghzr",
