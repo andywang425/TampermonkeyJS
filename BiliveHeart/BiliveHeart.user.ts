@@ -10,9 +10,8 @@
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
-/// <reference path='BiliveHeart.d.ts' />
 import * as CryptoJS from 'crypto-js'
-export { }
+import { patchData, RoomInfo, WebHeartBeat, sypderData, E, BagList, Medal } from './BiliveHeart'
 
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 

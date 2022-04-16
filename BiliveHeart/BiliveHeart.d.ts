@@ -146,4 +146,4 @@ interface EData {
   secret_rule: number[]
   patch_status: number
 }
-
+export { patchData, RoomInfo, WebHeartBeat, sypderData, E, BagList, Medal }
