@@ -4,3 +4,4 @@ interface replaceList {
   value: Set<HTMLInputElement>
   placeholder: Set<HTMLInputElement | HTMLTextAreaElement>
 }
+export { replaceList }

@@ -9,7 +9,7 @@
 // @grant       none
 // @run-at      document-start
 // ==/UserScript==
-/// <reference path="libReplaceText.d.ts" />
+import { replaceList } from './libReplaceText.d'
 
 class ReplaceText {
   /**
