@@ -41,9 +41,30 @@ interface poll {
   data: pollData
 }
 interface pollData {
+  is_new: boolean
+  mid: number
+  access_token: string
+  refresh_token: string
+  expires_in: number
+  token_info: pollDataTokenInfo
+  cookie_info: pollDataCookieInfo
+  sso: string[]
+}
+interface pollDataCookieInfo {
+  cookies: pollDataCookieInfoCooky[]
+  domains: string[]
+}
+interface pollDataCookieInfoCooky {
+  name: string
+  value: string
+  http_only: number
+  expires: number
+}
+interface pollDataTokenInfo {
   mid: number
   access_token: string
   refresh_token: string
   expires_in: number
 }
+
 export { md5, XHRheaders, authCode, confirm, pollData, poll }
