@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.12
+// @version     4.0.13
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -9,8 +9,8 @@
 // @match       https://live.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/live/*
-// @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@45f5c76d2f49a16c1cdaae78397779ee6fd72e8e/bliveproxy/bliveproxy.js
-// @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@fcb1c5db40d32f877d49c0ed2e41d57bd17ad96f/ajax-proxy/ajax-proxy.js
+// @require     https://fastly.jsdelivr.net/gh/lzghzr/TampermonkeyJS@45f5c76d2f49a16c1cdaae78397779ee6fd72e8e/bliveproxy/bliveproxy.js
+// @require     https://fastly.jsdelivr.net/gh/lzghzr/TampermonkeyJS@fcb1c5db40d32f877d49c0ed2e41d57bd17ad96f/ajax-proxy/ajax-proxy.js
 // @license     MIT
 // @grant       GM_addStyle
 // @grant       GM_getValue
@@ -39,7 +39,7 @@ class NoVIP {
       mutations.forEach(mutation => {
         mutation.addedNodes.forEach(addedNode => {
           if (addedNode instanceof HTMLDivElement && addedNode.classList.contains('danmaku-item')) {
-            const chatNode = <HTMLSpanElement>addedNode.querySelector('.danmaku-content')
+            const chatNode = <HTMLSpanElement>addedNode.querySelector('.danmaku-item-right')
             if (chatNode !== null) {
               const chatText = chatNode.innerText
               const dateNow = Date.now()
@@ -302,10 +302,10 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 }`
     if (config.menu.noEmoticons.enable) cssText += `
 #chat-control-panel-vm .emoticons-panel,
-.chat-item.chat-emoticon .danmaku-content.emoticon > img {
+.chat-item.chat-emoticon .danmaku-item-right.emoticon > img {
   display: none !important;
 }
-.chat-item.chat-emoticon .danmaku-content.emoticon > span {
+.chat-item.chat-emoticon .danmaku-item-right.emoticon > span {
   display: unset !important;
 }`
     if (config.menu.noEmotDanmaku.enable) cssText += `
@@ -710,7 +710,6 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
         return new Function(...fnStr)
       }
     }
-
   }
   // 屏蔽活动皮肤
   // if (config.menu.noActivityPlat.enable && !document.head.innerHTML.includes('addWaifu')) {
