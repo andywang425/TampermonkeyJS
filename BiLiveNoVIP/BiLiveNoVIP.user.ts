@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.13
+// @version     4.0.14
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -343,6 +343,10 @@ body[style*="overflow: hidden;"] {
 .bilibili-danmaku {
   color: #ffffff !important;
 }`
+    if (config.menu.noGameId.enable) cssText += `
+#game-id {
+  display: none !important;
+}`
     cssText += `
 .chat-history-list.with-penury-gift.with-brush-prompt {
   height: calc(100% - ${height}px) !important;
@@ -476,7 +480,7 @@ body[style*="overflow: hidden;"] {
 
 // 加载设置
 const defaultConfig: config = {
-  version: 1649345072816,
+  version: 1659968673723,
   menu: {
     noGiftMsg: {
       name: '屏蔽全部礼物及广播',
@@ -528,6 +532,10 @@ const defaultConfig: config = {
     },
     noDanmakuColor: {
       name: '屏蔽弹幕颜色',
+      enable: false
+    },
+    noGameId: {
+      name: '屏蔽互动游戏',
       enable: false
     },
     noActivityPlat: {
