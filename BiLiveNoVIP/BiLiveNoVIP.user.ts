@@ -235,6 +235,9 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
     }
     if (config.menu.noSuperChat.enable) cssText += `
 /* 调整 SuperChat 聊天框 */
+.chat-history-list {
+  padding-top: 5px !important;
+}
 .chat-item.superChat-card-detail {
   margin-left: unset !important;
   margin-right: unset !important;
