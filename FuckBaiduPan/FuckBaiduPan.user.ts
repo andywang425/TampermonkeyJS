@@ -7,7 +7,7 @@
 // @supportURL  https://github.com/lzghzr/TampermonkeyJS/issues
 // @match       *://pan.baidu.com/*
 // @match       *://yun.baidu.com/*
-// @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@fcb1c5db40d32f877d49c0ed2e41d57bd17ad96f/ajax-proxy/ajax-proxy.js
+// @require     https://github.com/lzghzr/TampermonkeyJS/raw/25127e6f47da91603645f9ec3a7da65ecb1180cf/Ajax-hook/Ajax-hook.js
 // @license     MIT
 // @grant       none
 // @run-at      document-end
