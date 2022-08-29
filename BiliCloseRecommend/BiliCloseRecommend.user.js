@@ -1,11 +1,12 @@
 // ==UserScript==
-// @name        Bilibili不连播推荐
+// @name        bilibili不连播推荐
 // @namespace   https://github.com/lzghzr/lzghzr/TampermonkeyJS
 // @version     0.0.1
 // @author      lzghzr
-// @description Bilibili自动连播：不会自动跳转到其他视频，只在分P间跳转
+// @description bilibili自动连播：不会自动跳转到其他视频，只在分P间跳转
 // @supportURL  https://github.com/lzghzr/TampermonkeyJS/issues
 // @match       https://www.bilibili.com/video/*
+// @license     MIT
 // @grant       none
 // @run-at      document-start
 // ==/UserScript==
