@@ -9,8 +9,8 @@
 // @match       https://live.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/live/*
-// @require     https://fastly.jsdelivr.net/gh/lzghzr/TampermonkeyJS@45f5c76d2f49a16c1cdaae78397779ee6fd72e8e/bliveproxy/bliveproxy.js
-// @require     https://fastly.jsdelivr.net/gh/lzghzr/TampermonkeyJS@fcb1c5db40d32f877d49c0ed2e41d57bd17ad96f/ajax-proxy/ajax-proxy.js
+// @require     https://github.com/lzghzr/TampermonkeyJS/raw/5fe14e0f8ac7ae8dd9a8fe8f8cbc58fe2d273112/bliveproxy/bliveproxy.js#sha256-QC/hfqL2rdtTK3GeK1ZUXDXmHU1xp42kC+ard3NKc9Q=
+// @require     https://github.com/lzghzr/TampermonkeyJS/raw/5fe14e0f8ac7ae8dd9a8fe8f8cbc58fe2d273112/ajax-proxy/ajax-proxy.js#sha256-gdnIAuKAoGbiVdPUVGp6xctZaZJlOwsdQ0o4LawIKzk=
 // @license     MIT
 // @grant       GM_addStyle
 // @grant       GM_getValue
