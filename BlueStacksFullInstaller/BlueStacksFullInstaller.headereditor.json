@@ -11,7 +11,7 @@
 			"exclude": "",
 			"group": "BlueStacks",
 			"isFunction": true,
-			"code": "if (detail.url.includes('nxt-bs5-n32_button_download'))\n  changeLocation(val)\nelse if (detail.url.includes('nxt-bs5-n64_button_download'))\n  changeLocation(val, true)\nelse if (detail.url.includes('nxt-bs5-pie64_button_download'))\n  changeLocation(val, true)\n\nfunction changeLocation(val, amd64) {\n  for (const a in val) {\n    if (val[a].name.toLowerCase() === 'location') {\n      if (amd64)\n        val[a].value = val[a].value.split('?')[0].replace('BlueStacksMicroInstaller', 'FullInstaller/x64/BlueStacksFullInstaller').replace('native', 'amd64_native')\n      else\n        val[a].value = val[a].value.split('?')[0].replace('BlueStacksMicroInstaller', 'FullInstaller/x86/BlueStacksFullInstaller').replace('native', 'x86_native')\n      break\n    }\n  }\n}"
+			"code": "if (detail.url.includes('nxt-bs5-n32_button_download')) {\n  changeLocation(val)\n}\nelse if (detail.url.includes('nxt-bs5-n64_button_download')) {\n  changeLocation(val, true)\n}\n\nfunction changeLocation(val, amd64) {\n  for (const a in val) {\n    if (val[a].name.toLowerCase() === 'location') {\n      if (amd64) {\n        val[a].value = val[a].value.split('?')[0].replace('BlueStacksMicroInstaller', 'FullInstaller/x64/BlueStacksFullInstaller').replace('native', 'amd64_native')\n      }\n      else {\n        val[a].value = val[a].value.split('?')[0].replace('BlueStacksMicroInstaller', 'FullInstaller/x86/BlueStacksFullInstaller').replace('native', 'x86_native')\n      }\n      break\n    }\n  }\n}"
 		}
 	],
 	"receiveBody": []
