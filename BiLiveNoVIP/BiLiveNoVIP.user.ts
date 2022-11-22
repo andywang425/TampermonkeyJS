@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.17
+// @version     4.0.18
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -25,6 +25,7 @@ const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 class NoVIP {
   public noBBChat = false
   public noBBDanmaku = false
+  public roomSkinList: HTMLStyleElement[] = []
   public elmStyleCSS!: HTMLStyleElement
   public chatObserver!: MutationObserver
   public danmakuObserver!: MutationObserver
@@ -77,17 +78,22 @@ class NoVIP {
     }, 60 * 1000)
     this.ChangeCSS()
     // 监听相关DOM
-    const bodyObserver = new MutationObserver(mutations => {
+    const docObserver = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
         mutation.addedNodes.forEach(addedNode => {
           if (addedNode instanceof HTMLDivElement && addedNode.classList.contains('dialog-ctnr')) {
             const blockEffectCtnr = addedNode.querySelector<HTMLDivElement>('.block-effect-ctnr')
             if (blockEffectCtnr !== null) this.AddUI(blockEffectCtnr)
           }
+          // 屏蔽房间皮肤
+          if (addedNode instanceof HTMLStyleElement && addedNode.id === 'skin-css') {
+            this.roomSkinList.push(addedNode)
+            this.NORoomSkin()
+          }
         })
       })
     })
-    bodyObserver.observe(document.body, { childList: true, subtree: true })
+    docObserver.observe(document, { childList: true, subtree: true })
   }
   /**
    * 启用聊天过滤
@@ -134,6 +140,15 @@ class NoVIP {
     if (!this.noBBDanmaku) return
     this.noBBDanmaku = false
     this.danmakuObserver.disconnect()
+  }
+  /**
+   * 屏蔽房间皮肤
+   *
+   * @memberof NoVIP
+   */
+  public NORoomSkin() {
+    if (config.menu.noRoomSkin.enable) this.roomSkinList.forEach(roomSkin => roomSkin.disabled = true)
+    else this.roomSkinList.forEach(roomSkin => roomSkin.disabled = false)
   }
   /**
    * 覆盖原有css
@@ -355,6 +370,7 @@ body[style*="overflow: hidden;"] {
     else this.disableNOBBChat()
     if (config.menu.noBBDanmaku.enable) this.enableNOBBDanmaku()
     else this.disableNOBBDanmaku()
+    this.NORoomSkin()
     this.elmStyleCSS.innerHTML = cssText
   }
   /**
@@ -576,8 +592,8 @@ if (userConfig.version === undefined || userConfig.version < defaultConfig.versi
 else config = userConfig
 
 if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
-  // 屏蔽视频轮播 & 隐身入场 & 房间皮肤
-  if (config.menu.invisible.enable || config.menu.noRoundPlay.enable || config.menu.noRoomSkin.enable || config.menu.noSleep.enable) {
+  // 屏蔽视频轮播 & 隐身入场
+  if (config.menu.invisible.enable || config.menu.noRoundPlay.enable || config.menu.noSleep.enable) {
     if (config.menu.noRoundPlay.enable)
       Reflect.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', {})
     // 拦截xhr
@@ -589,12 +605,6 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
       },
       responseText: {
         getter: function (value, xhr) {
-          // 屏蔽房间皮肤
-          if (config.menu.noRoomSkin.enable && xhr.responseURL.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom')) {
-            const json = JSON.parse(value)
-            json.data.skin_info = undefined
-            return JSON.stringify(json)
-          }
           // 屏蔽视频轮播
           if (config.menu.noRoundPlay.enable && xhr.responseURL.includes('//api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo'))
             return value.replace('"live_status":2', '"live_status":0')
@@ -616,13 +626,6 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
     // 拦截fetch
     W.fetch = new Proxy(W.fetch, {
       apply: async function (target, _this, args: [RequestInfo, RequestInit | undefined]) {
-        // 屏蔽房间皮肤
-        if (config.menu.noRoomSkin.enable && typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom')) {
-          const response: Response = await Reflect.apply(target, _this, args)
-          const body = await response.json()
-          body.data.skin_info = undefined
-          return new Response(JSON.stringify(body))
-        }
         // 屏蔽视频轮播
         if (config.menu.noRoundPlay.enable) {
           if (typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/live/getRoundPlayVideo')) {
@@ -662,14 +665,6 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
             if (match !== null)
               fnStr = fnStr.replace(regexp, '$<left>[...this.chatList.children].reduce((a,c)=>c.classList.contains("danmaku-item")?a+1:a,0)')
             else console.error(GM_info.script.name, '增强聊天显示失效')
-          }
-          // 屏蔽房间皮肤
-          if (config.menu.noRoomSkin.enable && fnStr.includes('/web-room/v1/index/getInfoByRoom 接口请求错误')) {
-            const regexp = /(?<left>getInfoByRoom\?room_id=.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByRoom 接口请求错误)/s
-            const match = fnStr.match(regexp)
-            if (match !== null)
-              fnStr = fnStr.replace(regexp, '$<left>delete $<mut>.sent.serverResponse.data.skin_info;$<right>')
-            else console.error(GM_info.script.name, '屏蔽房间皮肤失效')
           }
           // 屏蔽视频轮
           if (config.menu.noRoundPlay.enable && fnStr.includes('/xlive/web-room/v2/index/getRoomPlayInfo 接口请求错误')) {
