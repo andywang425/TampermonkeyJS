@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.18
+// @version     4.0.19
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -88,6 +88,11 @@ class NoVIP {
       });
     });
     docObserver.observe(document, { childList: true, subtree: true });
+    const skin = document.head.querySelector('#skin-css');
+    if (skin !== null) {
+      this.roomSkinList.push(skin);
+      this.NORoomSkin();
+    }
   }
   enableNOBBChat() {
     if (this.noBBChat)
@@ -212,8 +217,13 @@ body[style*="overflow: hidden;"] {
   overflow-y: overlay !important;
 }
 body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
+/* 进场 */
 #brush-prompt,
-.chat-item.misc-msg {
+.chat-item.misc-msg,
+/* 初始 */
+.chat-item.convention-msg,
+/* 点赞 */
+.chat-item[data-type="6"] {
   display: none !important;
 }`;
     }
@@ -337,7 +347,10 @@ body[style*="overflow: hidden;"] {
       cssText += `
 #pk-vm,
 #chaos-pk-vm,
-#game-id {
+/* 互动游戏 */
+#game-id,
+/* 一起玩 */
+#chat-control-panel-vm .play-together-entry {
   display: none !important;
 }`;
     cssText += `
@@ -456,14 +469,14 @@ body[style*="overflow: hidden;"] {
   }
 }
 const defaultConfig = {
-  version: 1661771976453,
+  version: 1670930374761,
   menu: {
     noGiftMsg: {
       name: '屏蔽全部礼物及广播',
       enable: false
     },
     noSystemMsg: {
-      name: '屏蔽进场信息',
+      name: '屏蔽系统消息',
       enable: false
     },
     noSuperChat: {
