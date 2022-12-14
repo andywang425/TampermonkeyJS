@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.19
+// @version     4.0.20
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -71,7 +71,6 @@ class NoVIP {
           danmakuMessage.delete(key);
       });
     }, 60 * 1000);
-    this.ChangeCSS();
     const docObserver = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
         mutation.addedNodes.forEach(addedNode => {
@@ -80,7 +79,7 @@ class NoVIP {
             if (blockEffectCtnr !== null)
               this.AddUI(blockEffectCtnr);
           }
-          if (addedNode instanceof HTMLStyleElement && addedNode.id === 'skin-css') {
+          else if (addedNode instanceof HTMLStyleElement && addedNode.id === 'skin-css') {
             this.roomSkinList.push(addedNode);
             this.NORoomSkin();
           }
@@ -91,44 +90,53 @@ class NoVIP {
     const skin = document.head.querySelector('#skin-css');
     if (skin !== null) {
       this.roomSkinList.push(skin);
-      this.NORoomSkin();
+    }
+    const block = localStorage.getItem('LIVE_BLCOK_EFFECT_STATE');
+    if (block?.includes('2')) {
+      localStorage.setItem('LIVE_BLCOK_EFFECT_STATE', '2');
+    }
+    else {
+      localStorage.setItem('LIVE_BLCOK_EFFECT_STATE', '');
+    }
+    this.ChangeCSS();
+  }
+  NOBBChat() {
+    if (config.menu.noBBChat.enable && !this.noBBChat) {
+      const elmDivChatList = document.querySelector('#chat-items');
+      if (elmDivChatList !== null) {
+        this.noBBChat = true;
+        this.chatObserver.observe(elmDivChatList, { childList: true });
+      }
+    }
+    else if (!config.menu.noBBChat.enable && this.noBBChat) {
+      this.noBBChat = false;
+      this.chatObserver.disconnect();
     }
   }
-  enableNOBBChat() {
-    if (this.noBBChat)
-      return;
-    const elmDivChatList = document.querySelector('#chat-items');
-    if (elmDivChatList !== null) {
-      this.noBBChat = true;
-      this.chatObserver.observe(elmDivChatList, { childList: true });
+  NOBBDanmaku() {
+    if (config.menu.noBBDanmaku.enable && !this.noBBDanmaku) {
+      const elmDivDanmaku = document.querySelector('#live-player');
+      if (elmDivDanmaku !== null) {
+        this.noBBDanmaku = true;
+        this.danmakuObserver.observe(elmDivDanmaku, { childList: true, subtree: true });
+      }
     }
-  }
-  disableNOBBChat() {
-    if (!this.noBBChat)
-      return;
-    this.noBBChat = false;
-    this.chatObserver.disconnect();
-  }
-  enableNOBBDanmaku() {
-    if (this.noBBDanmaku)
-      return;
-    const elmDivDanmaku = document.querySelector('#live-player');
-    if (elmDivDanmaku !== null) {
-      this.noBBDanmaku = true;
-      this.danmakuObserver.observe(elmDivDanmaku, { childList: true, subtree: true });
+    else if (!config.menu.noBBDanmaku.enable && this.noBBDanmaku) {
+      this.noBBDanmaku = false;
+      this.danmakuObserver.disconnect();
     }
-  }
-  disableNOBBDanmaku() {
-    if (!this.noBBDanmaku)
-      return;
-    this.noBBDanmaku = false;
-    this.danmakuObserver.disconnect();
   }
   NORoomSkin() {
-    if (config.menu.noRoomSkin.enable)
-      this.roomSkinList.forEach(roomSkin => roomSkin.disabled = true);
-    else
-      this.roomSkinList.forEach(roomSkin => roomSkin.disabled = false);
+    if (config.menu.noRoomSkin.enable) {
+      this.roomSkinList.forEach((roomSkin) => {
+        roomSkin.disabled = true;
+      });
+    }
+    else {
+      this.roomSkinList.forEach((roomSkin) => {
+        roomSkin.disabled = false;
+      });
+    }
   }
   ChangeCSS() {
     let height = 62;
@@ -357,14 +365,8 @@ body[style*="overflow: hidden;"] {
 .chat-history-list.with-penury-gift.with-brush-prompt {
   height: calc(100% - ${height}px) !important;
 }`;
-    if (config.menu.noBBChat.enable)
-      this.enableNOBBChat();
-    else
-      this.disableNOBBChat();
-    if (config.menu.noBBDanmaku.enable)
-      this.enableNOBBDanmaku();
-    else
-      this.disableNOBBDanmaku();
+    this.NOBBChat();
+    this.NOBBDanmaku();
     this.NORoomSkin();
     this.elmStyleCSS.innerHTML = cssText;
   }
@@ -394,10 +396,12 @@ body[style*="overflow: hidden;"] {
       spanClone.classList.remove('checkbox-selected');
       spanClone.classList.add('checkbox-default');
     };
-    const theSameName = (listNodes, x) => {
-      for (const clild of listNodes)
-        if (clild.innerText === config.menu[x].name)
+    const replaceItem = (listNodes, x) => {
+      for (const clild of listNodes) {
+        if (clild.innerText === config.menu[x].replace) {
           return clild;
+        }
+      }
     };
     const itemHTML = elmUList.firstElementChild.cloneNode(true);
     const itemInput = itemHTML.querySelector('input');
@@ -407,7 +411,7 @@ body[style*="overflow: hidden;"] {
     let i = listLength + 10;
     const listNodes = elmUList.childNodes;
     for (const x in config.menu) {
-      const clild = theSameName(listNodes, x);
+      const clild = replaceItem(listNodes, x);
       if (clild === undefined) {
         const itemHTMLClone = itemHTML.cloneNode(true);
         const itemInputClone = itemHTMLClone.querySelector('input');
@@ -421,6 +425,8 @@ body[style*="overflow: hidden;"] {
       }
       else {
         const itemHTMLClone = clild.cloneNode(true);
+        const itemLabelClone = itemHTMLClone.querySelector('label');
+        itemLabelClone.innerText = config.menu[x].name;
         changeListener(itemHTMLClone, x);
         clild.remove();
         elmUList.appendChild(itemHTMLClone);
@@ -469,26 +475,31 @@ body[style*="overflow: hidden;"] {
   }
 }
 const defaultConfig = {
-  version: 1670930374761,
+  version: 1671026717474,
   menu: {
     noGiftMsg: {
-      name: '屏蔽全部礼物及广播',
+      name: '屏蔽礼物相关',
+      replace: '屏蔽全部礼物及广播',
       enable: false
     },
     noSystemMsg: {
       name: '屏蔽系统消息',
+      replace: '屏蔽进场信息',
       enable: false
     },
     noSuperChat: {
       name: '屏蔽醒目留言',
+      replace: '屏蔽醒目留言',
       enable: false
     },
     noEmoticons: {
-      name: '屏蔽表情动画（右下角）',
+      name: '屏蔽表情聊天',
+      replace: '屏蔽表情动画（右下角）',
       enable: false
     },
     noEmotDanmaku: {
       name: '屏蔽表情弹幕',
+      replace: '屏蔽表情弹幕',
       enable: false
     },
     noKanBanMusume: {
