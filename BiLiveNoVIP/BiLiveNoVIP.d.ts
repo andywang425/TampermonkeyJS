@@ -17,6 +17,7 @@ interface configMenu {
 }
 interface configMenuData {
   name: string
+  replace?: string
   enable: boolean
 }
 // 弹幕格式
