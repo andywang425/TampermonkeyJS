@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.21
+// @version     4.0.22
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -317,6 +317,20 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 .bilibili-danmaku > img {
   display: none !important;
 }`;
+    if (config.menu.noGiftControl.enable)
+      cssText += `
+/* 人气榜 */
+#head-info-vm .popular-and-hot-rank,
+/* 活动榜 */
+#head-info-vm .gift-planet-entry,
+#head-info-vm .activity-entry,
+/* 礼物按钮 */
+#web-player-controller-wrap-el .web-live-player-gift-icon-wrap,
+/* 礼物栏 */
+#gift-control-vm .gift-control-panel,
+#web-player__bottom-bar__container {
+  display: none !important;
+}`;
     if (config.menu.noKanBanMusume.enable)
       cssText += `
 #my-dear-haruna-vm {
@@ -475,7 +489,7 @@ body[style*="overflow: hidden;"] {
   }
 }
 const defaultConfig = {
-  version: 1671026717474,
+  version: 1679755673751,
   menu: {
     noGiftMsg: {
       name: '屏蔽礼物相关',
@@ -500,6 +514,10 @@ const defaultConfig = {
     noEmotDanmaku: {
       name: '屏蔽表情弹幕',
       replace: '屏蔽表情弹幕',
+      enable: false
+    },
+    noGiftControl: {
+      name: '屏蔽礼物控件',
       enable: false
     },
     noKanBanMusume: {
