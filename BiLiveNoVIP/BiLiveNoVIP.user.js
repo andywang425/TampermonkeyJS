@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.22
+// @version     4.0.23
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -50,7 +50,7 @@ class NoVIP {
       mutations.forEach(mutation => {
         mutation.addedNodes.forEach(addedNode => {
           const danmakuNode = addedNode instanceof Text ? addedNode.parentElement : addedNode;
-          if (danmakuNode?.classList?.contains('bilibili-danmaku')) {
+          if (danmakuNode?.classList?.contains('bili-dm')) {
             const danmakuText = danmakuNode.innerText;
             const dateNow = Date.now();
             if (danmakuMessage.has(danmakuText) && dateNow - danmakuMessage.get(danmakuText) < 5000)
@@ -314,7 +314,7 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 }`;
     if (config.menu.noEmotDanmaku.enable)
       cssText += `
-.bilibili-danmaku > img {
+.bili-dm > img {
   display: none !important;
 }`;
     if (config.menu.noGiftControl.enable)
@@ -362,7 +362,7 @@ body[style*="overflow: hidden;"] {
 }`;
     if (config.menu.noDanmakuColor.enable)
       cssText += `
-.bilibili-danmaku {
+.bili-dm {
   color: #ffffff !important;
 }`;
     if (config.menu.noGameId.enable)
