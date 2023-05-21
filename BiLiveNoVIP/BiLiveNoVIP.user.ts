@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.23
+// @version     4.0.24
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -412,6 +412,8 @@ body[style*="overflow: hidden;"] {
    */
   public AddUI(addedNode: HTMLDivElement) {
     const elmUList = <HTMLUListElement>addedNode.firstElementChild
+    // 去除注释
+    elmUList.childNodes.forEach(child => {if (child instanceof Comment) child.remove()})
     const listLength = elmUList.childElementCount
     if (listLength > 10) return
 
@@ -439,9 +441,9 @@ body[style*="overflow: hidden;"] {
       spanClone.classList.add('checkbox-default')
     }
     const replaceItem = (listNodes: NodeListOf<HTMLLIElement>, x: string): HTMLLIElement | void => {
-      for (const clild of listNodes) {
-        if (clild.innerText === config.menu[x].replace) {
-          return clild
+      for (const child of listNodes) {
+        if (child.innerText === config.menu[x].replace) {
+          return child
         }
       }
     }
@@ -457,8 +459,8 @@ body[style*="overflow: hidden;"] {
     let i = listLength + 10
     const listNodes = <NodeListOf<HTMLLIElement>>elmUList.childNodes
     for (const x in config.menu) {
-      const clild = replaceItem(listNodes, x)
-      if (clild === undefined) {
+      const child = replaceItem(listNodes, x)
+      if (child === undefined) {
         const itemHTMLClone = <HTMLLIElement>itemHTML.cloneNode(true)
         const itemInputClone = <HTMLInputElement>itemHTMLClone.querySelector('input')
         const itemLabelClone = <HTMLLabelElement>itemHTMLClone.querySelector('label')
@@ -472,12 +474,12 @@ body[style*="overflow: hidden;"] {
         elmUList.appendChild(itemHTMLClone)
       }
       else {
-        const itemHTMLClone = <HTMLLIElement>clild.cloneNode(true)
+        const itemHTMLClone = <HTMLLIElement>child.cloneNode(true)
         const itemLabelClone = <HTMLLabelElement>itemHTMLClone.querySelector('label')
         itemLabelClone.innerText = config.menu[x].name
 
         changeListener(itemHTMLClone, x)
-        clild.remove()
+        child.remove()
         elmUList.appendChild(itemHTMLClone)
       }
     }

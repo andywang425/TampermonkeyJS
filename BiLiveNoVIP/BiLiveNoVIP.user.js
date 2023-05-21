@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.23
+// @version     4.0.24
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -386,6 +386,8 @@ body[style*="overflow: hidden;"] {
   }
   AddUI(addedNode) {
     const elmUList = addedNode.firstElementChild;
+    elmUList.childNodes.forEach(child => { if (child instanceof Comment)
+      child.remove(); });
     const listLength = elmUList.childElementCount;
     if (listLength > 10)
       return;
@@ -411,9 +413,9 @@ body[style*="overflow: hidden;"] {
       spanClone.classList.add('checkbox-default');
     };
     const replaceItem = (listNodes, x) => {
-      for (const clild of listNodes) {
-        if (clild.innerText === config.menu[x].replace) {
-          return clild;
+      for (const child of listNodes) {
+        if (child.innerText === config.menu[x].replace) {
+          return child;
         }
       }
     };
@@ -425,8 +427,8 @@ body[style*="overflow: hidden;"] {
     let i = listLength + 10;
     const listNodes = elmUList.childNodes;
     for (const x in config.menu) {
-      const clild = replaceItem(listNodes, x);
-      if (clild === undefined) {
+      const child = replaceItem(listNodes, x);
+      if (child === undefined) {
         const itemHTMLClone = itemHTML.cloneNode(true);
         const itemInputClone = itemHTMLClone.querySelector('input');
         const itemLabelClone = itemHTMLClone.querySelector('label');
@@ -438,11 +440,11 @@ body[style*="overflow: hidden;"] {
         elmUList.appendChild(itemHTMLClone);
       }
       else {
-        const itemHTMLClone = clild.cloneNode(true);
+        const itemHTMLClone = child.cloneNode(true);
         const itemLabelClone = itemHTMLClone.querySelector('label');
         itemLabelClone.innerText = config.menu[x].name;
         changeListener(itemHTMLClone, x);
-        clild.remove();
+        child.remove();
         elmUList.appendChild(itemHTMLClone);
       }
     }
