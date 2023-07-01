@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.24
+// @version     4.0.25
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -388,6 +388,7 @@ body[style*="overflow: hidden;"] {
 }`
     if (config.menu.noGameId.enable) cssText += `
 #pk-vm,
+#awesome-pk-vm,
 #chaos-pk-vm,
 /* 互动游戏 */
 #game-id,
