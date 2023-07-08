@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.26
+// @version     4.0.27
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -173,7 +173,7 @@ class NoVIP {
     let cssText = `
 /* 统一用户名颜色 */
 .chat-item .user-name {
-  color: #23ade5 !important;
+  color: var(--brand_blue) !important;
 }`
     if (config.menu.noGuardIcon.enable) cssText += `
 /* 排行榜 */
@@ -181,17 +181,17 @@ class NoVIP {
   background-image: unset !important;
 }
 #rank-list-ctnr-box.bgStyle .item {
-  color: #9499A0 !important;
+  color: var(--text3) !important;
 }
 #rank-list-ctnr-box.bgStyle .item.active {
-  color: #2F3238 !important;
+  color: var(--Ga9) !important;
 }
-#rank-list-ctnr-box.bgStyle .hundred .rank {
-  color: #2F3238 !important;
+#rank-list-ctnr-box.bgStyle .rank-cntr .rank {
+  color: var(--Ga9) !important;
   font-weight: unset !important;
 }
 #rank-list-ctnr-box.bgStyle .daily-text {
-  color: #61666D !important;
+  color: var(--text2) !important;
 }
 
 .chat-item.guard-danmaku .vip-icon {
@@ -314,7 +314,7 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
   margin-right: 4px !important;
 }
 .chat-item .name {
-  color: #23ade5 !important;
+  color: var(--brand_blue) !important;
   display: unset !important;
   font-size: unset !important;
   font-weight: unset !important;
@@ -341,7 +341,7 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
   display: unset !important;
 }
 .chat-item .text {
-  color: #646c7a !important;
+  color: var(--text2) !important;
 }
 /* SuperChat 提示条 */
 #chat-msg-bubble-vm,
