@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.28
+// @version     4.0.29
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -176,24 +176,6 @@ class NoVIP {
   color: var(--brand_blue) !important;
 }`
     if (config.menu.noGuardIcon.enable) cssText += `
-/* 排行榜 */
-#rank-list-ctnr-box.bgStyle {
-  background-image: unset !important;
-}
-#rank-list-ctnr-box.bgStyle .item {
-  color: var(--text3) !important;
-}
-#rank-list-ctnr-box.bgStyle .item.active {
-  color: var(--Ga9) !important;
-}
-#rank-list-ctnr-box.bgStyle .rank-cntr .rank {
-  color: var(--Ga9) !important;
-  font-weight: unset !important;
-}
-#rank-list-ctnr-box.bgStyle .daily-text {
-  color: var(--text2) !important;
-}
-
 .chat-item.guard-danmaku .vip-icon {
   margin-right: 4px !important;
 }
@@ -424,6 +406,24 @@ body[style*="overflow: hidden;"] {
 .chat-history-list.with-penury-gift.with-brush-prompt {
   height: calc(100% - ${height}px) !important;
 }`
+    if (config.menu.noRoomSkin.enable) cssText += `
+/* 排行榜 */
+#rank-list-ctnr-box.bgStyle {
+  background-image: unset !important;
+}
+#rank-list-ctnr-box.bgStyle .item {
+  color: var(--text3) !important;
+}
+#rank-list-ctnr-box.bgStyle .item.active {
+  color: var(--Ga9) !important;
+}
+#rank-list-ctnr-box.bgStyle .rank-cntr .rank {
+  color: var(--Ga9) !important;
+  font-weight: unset !important;
+}
+#rank-list-ctnr-box.bgStyle .daily-text {
+  color: var(--text2) !important;
+}`
     this.NOBBChat()
     this.NOBBDanmaku()
     this.NORoomSkin()
@@ -558,7 +558,7 @@ body[style*="overflow: hidden;"] {
 
 // 加载设置
 const defaultConfig: config = {
-  version: 1690367367875,
+  version: 1690375650406,
   menu: {
     noGiftMsg: {
       name: '屏蔽礼物相关',
@@ -613,14 +613,6 @@ const defaultConfig: config = {
       name: '屏蔽抽奖橱窗',
       enable: false
     },
-    noBBChat: {
-      name: '屏蔽刷屏聊天',
-      enable: false
-    },
-    noBBDanmaku: {
-      name: '屏蔽刷屏弹幕',
-      enable: false
-    },
     noDanmakuColor: {
       name: '屏蔽弹幕颜色',
       enable: false
@@ -629,12 +621,20 @@ const defaultConfig: config = {
       name: '屏蔽互动游戏',
       enable: false
     },
-    noActivityPlat: {
-      name: '屏蔽活动皮肤',
+    noBBChat: {
+      name: '屏蔽刷屏聊天',
+      enable: false
+    },
+    noBBDanmaku: {
+      name: '屏蔽刷屏弹幕',
       enable: false
     },
     noRoomSkin: {
       name: '屏蔽房间皮肤',
+      enable: false
+    },
+    noActivityPlat: {
+      name: '屏蔽活动皮肤',
       enable: false
     },
     noRoundPlay: {
