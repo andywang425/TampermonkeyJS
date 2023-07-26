@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.27
+// @version     4.0.28
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -9,8 +9,8 @@
 // @match       https://live.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/live/*
-// @require     https://github.com/lzghzr/TampermonkeyJS/raw/5fe14e0f8ac7ae8dd9a8fe8f8cbc58fe2d273112/bliveproxy/bliveproxy.js#sha256-QC/hfqL2rdtTK3GeK1ZUXDXmHU1xp42kC+ard3NKc9Q=
-// @require     https://github.com/lzghzr/TampermonkeyJS/raw/5fe14e0f8ac7ae8dd9a8fe8f8cbc58fe2d273112/ajax-proxy/ajax-proxy.js#sha256-gdnIAuKAoGbiVdPUVGp6xctZaZJlOwsdQ0o4LawIKzk=
+// @require     https://github.com/lzghzr/TampermonkeyJS/raw/5fe14e0f8ac7ae8dd9a8fe8f8cbc58fe2d273112/bliveproxy/bliveproxy.js#sha256=QC/hfqL2rdtTK3GeK1ZUXDXmHU1xp42kC+ard3NKc9Q=
+// @require     https://github.com/lzghzr/TampermonkeyJS/raw/5fe14e0f8ac7ae8dd9a8fe8f8cbc58fe2d273112/ajax-proxy/ajax-proxy.js#sha256=gdnIAuKAoGbiVdPUVGp6xctZaZJlOwsdQ0o4LawIKzk=
 // @license     MIT
 // @grant       GM_addStyle
 // @grant       GM_getValue
@@ -189,6 +189,8 @@ class NoVIP {
   margin: 0 !important;
 }
 #welcome-area-bottom-vm,
+/* 粉丝勋章内标识 */
+.chat-item .fans-medal-item-ctnr .medal-guard,
 .chat-item.common-danmuku-msg,
 .chat-item.guard-buy,
 .chat-item.welcome-guard,
@@ -354,7 +356,12 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 #my-dear-haruna-vm {
   display: none !important;
 }`;
-    if (config.menu.noMedalIcon.enable)
+    if (config.menu.noWealthMedalIcon.enable)
+      cssText += `
+.chat-item .wealth-medal-ctnr {
+  display: none !important;
+}`;
+    if (config.menu.noFansMedalIcon.enable)
       cssText += `
 .chat-item .fans-medal-item-ctnr {
   display: none !important;
@@ -510,7 +517,7 @@ body[style*="overflow: hidden;"] {
   }
 }
 const defaultConfig = {
-  version: 1679755673751,
+  version: 1690367367875,
   menu: {
     noGiftMsg: {
       name: '屏蔽礼物相关',
@@ -549,7 +556,11 @@ const defaultConfig = {
       name: '屏蔽舰队标识',
       enable: false
     },
-    noMedalIcon: {
+    noWealthMedalIcon: {
+      name: '屏蔽荣耀勋章',
+      enable: false
+    },
+    noFansMedalIcon: {
       name: '屏蔽粉丝勋章',
       enable: false
     },
