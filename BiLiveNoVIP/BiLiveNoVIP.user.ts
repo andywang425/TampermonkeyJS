@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.0.29
+// @version     4.1.0
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -25,7 +25,6 @@ const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 class NoVIP {
   public noBBChat = false
   public noBBDanmaku = false
-  public roomSkinList: HTMLStyleElement[] = []
   public elmStyleCSS!: HTMLStyleElement
   public chatObserver!: MutationObserver
   public danmakuObserver!: MutationObserver
@@ -84,20 +83,10 @@ class NoVIP {
             const blockEffectCtnr = addedNode.querySelector<HTMLDivElement>('.block-effect-ctnr')
             if (blockEffectCtnr !== null) this.AddUI(blockEffectCtnr)
           }
-          // 屏蔽房间皮肤
-          else if (addedNode instanceof HTMLStyleElement && addedNode.id === 'skin-css') {
-            this.roomSkinList.push(addedNode)
-            this.NORoomSkin()
-          }
         })
       })
     })
     docObserver.observe(document, { childList: true, subtree: true })
-    // 屏蔽房间皮肤
-    const skin = <HTMLStyleElement>document.head.querySelector('#skin-css')
-    if (skin !== null) {
-      this.roomSkinList.push(skin)
-    }
     // 取消自带设置
     const block = localStorage.getItem('LIVE_BLCOK_EFFECT_STATE')
     if (block?.includes('2')) {
@@ -143,23 +132,6 @@ class NoVIP {
     else if (!config.menu.noBBDanmaku.enable && this.noBBDanmaku) {
       this.noBBDanmaku = false
       this.danmakuObserver.disconnect()
-    }
-  }
-  /**
-   * 屏蔽房间皮肤
-   *
-   * @memberof NoVIP
-   */
-  public NORoomSkin() {
-    if (config.menu.noRoomSkin.enable) {
-      this.roomSkinList.forEach((roomSkin) => {
-        roomSkin.disabled = true
-      })
-    }
-    else {
-      this.roomSkinList.forEach((roomSkin) => {
-        roomSkin.disabled = false
-      })
     }
   }
   /**
@@ -406,27 +378,8 @@ body[style*="overflow: hidden;"] {
 .chat-history-list.with-penury-gift.with-brush-prompt {
   height: calc(100% - ${height}px) !important;
 }`
-    if (config.menu.noRoomSkin.enable) cssText += `
-/* 排行榜 */
-#rank-list-ctnr-box.bgStyle {
-  background-image: unset !important;
-}
-#rank-list-ctnr-box.bgStyle .item {
-  color: var(--text3) !important;
-}
-#rank-list-ctnr-box.bgStyle .item.active {
-  color: var(--Ga9) !important;
-}
-#rank-list-ctnr-box.bgStyle .rank-cntr .rank {
-  color: var(--Ga9) !important;
-  font-weight: unset !important;
-}
-#rank-list-ctnr-box.bgStyle .daily-text {
-  color: var(--text2) !important;
-}`
     this.NOBBChat()
     this.NOBBDanmaku()
-    this.NORoomSkin()
     this.elmStyleCSS.innerHTML = cssText
   }
   /**
@@ -438,7 +391,7 @@ body[style*="overflow: hidden;"] {
   public AddUI(addedNode: HTMLDivElement) {
     const elmUList = <HTMLUListElement>addedNode.firstElementChild
     // 去除注释
-    elmUList.childNodes.forEach(child => {if (child instanceof Comment) child.remove()})
+    elmUList.childNodes.forEach(child => { if (child instanceof Comment) child.remove() })
     const listLength = elmUList.childElementCount
     if (listLength > 10) return
 
@@ -667,8 +620,8 @@ if (userConfig.version === undefined || userConfig.version < defaultConfig.versi
 else config = userConfig
 
 if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
-  // 屏蔽视频轮播 & 隐身入场
-  if (config.menu.invisible.enable || config.menu.noRoundPlay.enable || config.menu.noSleep.enable) {
+  // 屏蔽视频轮播 & 隐身入场 & 房间皮肤
+  if (config.menu.invisible.enable || config.menu.noRoundPlay.enable || config.menu.noRoomSkin.enable || config.menu.noSleep.enable) {
     if (config.menu.noRoundPlay.enable)
       Reflect.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', {})
     // 拦截xhr
@@ -680,6 +633,19 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
       },
       responseText: {
         getter: function (value, xhr) {
+          // 屏蔽房间皮肤
+          if (config.menu.noRoomSkin.enable) {
+            if (xhr.responseURL.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom')) {
+              const body = JSON.parse(value)
+              delete body.data.skin_info
+              return JSON.stringify(body)
+            }
+            if (xhr.responseURL.includes('//api.live.bilibili.com/xlive/app-room/v2/guardTab/topList')) {
+              const body = JSON.parse(value)
+              body.data.info.anchor_guard_achieve_level = 0
+              return JSON.stringify(body)
+            }
+          }
           // 屏蔽视频轮播
           if (config.menu.noRoundPlay.enable && xhr.responseURL.includes('//api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo'))
             return value.replace('"live_status":2', '"live_status":0')
@@ -701,6 +667,21 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
     // 拦截fetch
     W.fetch = new Proxy(W.fetch, {
       apply: async function (target, _this, args: [RequestInfo, RequestInit | undefined]) {
+        // 屏蔽房间皮肤
+        if (config.menu.noRoomSkin.enable) {
+          if (typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom')) {
+            const response: Response = await Reflect.apply(target, _this, args)
+            const body = await response.json()
+            delete body.data.skin_info
+            return new Response(JSON.stringify(body))
+          }
+          if (typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/xlive/app-room/v2/guardTab/topList')) {
+            const response: Response = await Reflect.apply(target, _this, args)
+            const body = await response.json()
+            body.data.info.anchor_guard_achieve_level = 0
+            return new Response(JSON.stringify(body))
+          }
+        }
         // 屏蔽视频轮播
         if (config.menu.noRoundPlay.enable) {
           if (typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/live/getRoundPlayVideo')) {
@@ -734,12 +715,30 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
       apply: function (target, _this, args) {
         for (const [name, fn] of Object.entries<Function>(args[0][1])) {
           let fnStr = fn.toString()
+          // 增强聊天显示
           if (fnStr.includes('return this.chatList.children.length')) {
             const regexp = /(?<left>return )this\.chatList\.children\.length/s
             const match = fnStr.match(regexp)
             if (match !== null)
               fnStr = fnStr.replace(regexp, '$<left>[...this.chatList.children].reduce((a,c)=>c.classList.contains("danmaku-item")?a+1:a,0)')
             else console.error(GM_info.script.name, '增强聊天显示失效')
+          }
+          // 屏蔽房间皮肤
+          if (config.menu.noRoomSkin.enable) {
+            if (fnStr.includes('/web-room/v1/index/getInfoByRoom 接口请求错误')) {
+              const regexp = /(?<left>getInfoByRoom\?room_id=.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByRoom 接口请求错误)/s
+              const match = fnStr.match(regexp)
+              if (match !== null)
+                fnStr = fnStr.replace(regexp, '$<left>delete $<mut>.sent.serverResponse.data.skin_info;$<right>')
+              else console.error(GM_info.script.name, '屏蔽房间皮肤失效')
+            }
+            if (fnStr.includes('"/xlive/app-room/v2/guardTab/topList"')) {
+              const regexp = /(?<left>\.guard\+" "\+.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.data.*?\.top3)/s
+              const match = fnStr.match(regexp)
+              if (match !== null)
+                fnStr = fnStr.replace(regexp, '$<left>$<mut>.data.info.anchor_guard_achieve_level=0;$<right>')
+              else console.error(GM_info.script.name, '屏蔽房间皮肤失效')
+            }
           }
           // 屏蔽视频轮
           if (config.menu.noRoundPlay.enable && fnStr.includes('/xlive/web-room/v2/index/getRoomPlayInfo 接口请求错误')) {
@@ -762,7 +761,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
             const regexp = /(?<left>getInfoByUser\?room_id=)"\+\w+(?<mid>\+.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByUser 接口请求错误)/s
             const match = fnStr.match(regexp)
             if (match !== null)
-              fnStr = fnStr.replace(regexp, '$<left>273022"$<mid>$<mut>.sent.serverResponse.data.badge.is_room_admin=true;$3')
+              fnStr = fnStr.replace(regexp, '$<left>273022"$<mid>$<mut>.sent.serverResponse.data.badge.is_room_admin=true;$<right>')
             else console.error(GM_info.script.name, '隐身入场失效')
           }
           if (fn.toString() !== fnStr) args[0][1][name] = str2Fn(fnStr)
