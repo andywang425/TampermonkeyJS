@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.1.1
+// @version     4.1.2
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -115,6 +115,26 @@ class NoVIP {
     else if (!config.menu.noBBDanmaku.enable && this.noBBDanmaku) {
       this.noBBDanmaku = false;
       this.danmakuObserver.disconnect();
+    }
+  }
+  NORoomSkin() {
+    if (W.roomBuffService.mount !== undefined) {
+      W.roomBuffService.mount = new Proxy(W.roomBuffService.mount, {
+        apply: function (target, _this, args) {
+          _this.__NORoomSkin_skin = args[0];
+          if (_this.__NORoomSkin)
+            args[0] = {};
+          return Reflect.apply(target, _this, args);
+        }
+      });
+    }
+    if (config.menu.noRoomSkin.enable) {
+      W.roomBuffService.__NORoomSkin = true;
+      W.roomBuffService.unmount();
+    }
+    else {
+      W.roomBuffService.__NORoomSkin = false;
+      W.roomBuffService.mount(W.roomBuffService.__NORoomSkin_skin);
     }
   }
   ChangeCSS() {
@@ -372,6 +392,7 @@ body[style*="overflow: hidden;"] {
 }`;
     this.NOBBChat();
     this.NOBBDanmaku();
+    this.NORoomSkin();
     this.elmStyleCSS.innerHTML = cssText;
   }
   AddUI(addedNode) {
@@ -601,11 +622,6 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
       responseText: {
         getter: function (value, xhr) {
           if (config.menu.noRoomSkin.enable) {
-            if (xhr.responseURL.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom')) {
-              const body = JSON.parse(value);
-              delete body.data.skin_info;
-              return JSON.stringify(body);
-            }
             if (xhr.responseURL.includes('//api.live.bilibili.com/xlive/app-room/v2/guardTab/topList')) {
               const body = JSON.parse(value);
               body.data.info.anchor_guard_achieve_level = 0;
@@ -630,12 +646,6 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
     W.fetch = new Proxy(W.fetch, {
       apply: async function (target, _this, args) {
         if (config.menu.noRoomSkin.enable) {
-          if (typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom')) {
-            const response = await Reflect.apply(target, _this, args);
-            const body = await response.json();
-            delete body.data.skin_info;
-            return new Response(JSON.stringify(body));
-          }
           if (typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/xlive/app-room/v2/guardTab/topList')) {
             const response = await Reflect.apply(target, _this, args);
             const body = await response.json();
@@ -681,15 +691,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
               console.error(GM_info.script.name, '增强聊天显示失效');
           }
           if (config.menu.noRoomSkin.enable) {
-            if (fnStr.includes('/web-room/v1/index/getInfoByRoom 接口请求错误')) {
-              const regexp = /(?<left>getInfoByRoom\?room_id=.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByRoom 接口请求错误)/s;
-              const match = fnStr.match(regexp);
-              if (match !== null)
-                fnStr = fnStr.replace(regexp, '$<left>delete $<mut>.sent.serverResponse.data.skin_info;$<right>');
-              else
-                console.error(GM_info.script.name, '屏蔽房间皮肤失效');
-            }
-            if (fnStr.includes('"/xlive/app-room/v2/guardTab/topList"')) {
+            if (fnStr.includes('/xlive/app-room/v2/guardTab/topList')) {
               const regexp = /(?<left>\.guard\+" "\+.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.data.*?\.top3)/s;
               const match = fnStr.match(regexp);
               if (match !== null)

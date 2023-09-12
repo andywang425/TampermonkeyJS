@@ -5,6 +5,12 @@ export class ajaxProxy {
 declare global {
   interface Window {
     webpackChunklive_room: unknown[]
+    roomBuffService: {
+      mount: (skin: {}) => void,
+      unmount: () => void,
+      __NORoomSkin_skin: {},
+      __NORoomSkin: boolean,
+    }
   }
 }
 // 设置信息
