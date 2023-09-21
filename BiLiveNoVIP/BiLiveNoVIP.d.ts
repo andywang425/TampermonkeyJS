@@ -88,4 +88,17 @@ interface playerType {
 //     }
 //   }
 // })
+
+// 屏蔽活动皮肤
+// if (config.menu.noActivityPlat.enable && !document.head.innerHTML.includes('addWaifu')) {
+//   document.open()
+//   document.addEventListener('readystatechange', () => {
+//     if (document.readyState === 'complete') new NoVIP().Start()
+//   })
+//   const room4 = await fetch('/4', { credentials: 'include' }).then(res => res.text().catch(() => undefined)).catch(() => undefined)
+//   if (room4 !== undefined) {
+//     document.write(room4.replace(/<script>window\.__NEPTUNE_IS_MY_WAIFU__=.*?<\/script>/, ''))
+//     document.close()
+//   }
+// }
 export { config }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.1.2
+// @version     4.2.0
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -9,8 +9,6 @@
 // @match       https://live.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/activity-*
 // @match       https://www.bilibili.com/blackboard/live/*
-// @require     https://github.com/lzghzr/TampermonkeyJS/raw/5fe14e0f8ac7ae8dd9a8fe8f8cbc58fe2d273112/bliveproxy/bliveproxy.js#sha256=QC/hfqL2rdtTK3GeK1ZUXDXmHU1xp42kC+ard3NKc9Q=
-// @require     https://github.com/lzghzr/TampermonkeyJS/raw/5fe14e0f8ac7ae8dd9a8fe8f8cbc58fe2d273112/ajax-proxy/ajax-proxy.js#sha256=gdnIAuKAoGbiVdPUVGp6xctZaZJlOwsdQ0o4LawIKzk=
 // @license     MIT
 // @grant       GM_addStyle
 // @grant       GM_getValue
@@ -18,7 +16,7 @@
 // @run-at      document-start
 // ==/UserScript==
 import { GM_addStyle, GM_getValue, GM_setValue } from '../@types/tm_f'
-import { config, ajaxProxy } from './BiLiveNoVIP'
+import { config } from './BiLiveNoVIP'
 
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 
@@ -140,15 +138,6 @@ class NoVIP {
    * @memberof NoVIP
    */
   public NORoomSkin() {
-    if (W.roomBuffService.mount !== undefined) {
-      W.roomBuffService.mount = new Proxy(W.roomBuffService.mount, {
-        apply: function (target, _this, args) {
-          _this.__NORoomSkin_skin = args[0]
-          if (_this.__NORoomSkin) args[0] = {}
-          return Reflect.apply(target, _this, args)
-        }
-      })
-    }
     if (config.menu.noRoomSkin.enable) {
       W.roomBuffService.__NORoomSkin = true
       W.roomBuffService.unmount()
@@ -649,171 +638,97 @@ if (userConfig.version === undefined || userConfig.version < defaultConfig.versi
 else config = userConfig
 
 if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
-  // 屏蔽视频轮播 & 隐身入场 & 房间皮肤
-  if (config.menu.invisible.enable || config.menu.noRoundPlay.enable || config.menu.noRoomSkin.enable || config.menu.noSleep.enable) {
-    if (config.menu.noRoundPlay.enable)
-      Reflect.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', {})
-    // 拦截xhr
-    ajaxProxy.proxyAjax({
-      open: function (args, _xhr) {
-        // 隐身入场
-        if (config.menu.invisible.enable && args[1].includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser'))
-          return (args[1] = args[1].replace(/room_id=\d+/, 'room_id=273022')) && args
-      },
-      responseText: {
-        getter: function (value, xhr) {
-          // 屏蔽房间皮肤
-          if (config.menu.noRoomSkin.enable) {
-            if (xhr.responseURL.includes('//api.live.bilibili.com/xlive/app-room/v2/guardTab/topList')) {
-              const body = JSON.parse(value)
-              body.data.info.anchor_guard_achieve_level = 0
-              return JSON.stringify(body)
-            }
-          }
-          // 屏蔽视频轮播
-          if (config.menu.noRoundPlay.enable && xhr.responseURL.includes('//api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo'))
-            return value.replace('"live_status":2', '"live_status":0')
-          // 隐身入场
-          if (config.menu.invisible.enable && xhr.responseURL.includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser'))
-            return value.replace('"is_room_admin":false', '"is_room_admin":true')
-          return value
+  if (config.menu.noRoundPlay.enable)
+    Reflect.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', {})
+  // 拦截函数
+  W.webpackChunklive_room = W.webpackChunklive_room || []
+  W.webpackChunklive_room.push = new Proxy(W.webpackChunklive_room.push, {
+    apply: function (target, _this, args) {
+      for (const [name, fn] of Object.entries<Function>(args[0][1])) {
+        let fnStr = fn.toString()
+        // 增强聊天显示
+        if (fnStr.includes('return this.chatList.children.length')) {
+          const regexp = /(?<left>return )this\.chatList\.children\.length/s
+          const match = fnStr.match(regexp)
+          if (match !== null)
+            fnStr = fnStr.replace(regexp, '$<left>[...this.chatList.children].reduce((a,c)=>c.classList.contains("danmaku-item")?a+1:a,0)')
+          else console.error(GM_info.script.name, '增强聊天显示失效')
         }
-      },
-      status: {
-        getter: function (value, xhr) {
-          // 屏蔽视频轮播
-          if (config.menu.noRoundPlay.enable && xhr.responseURL.includes('//api.live.bilibili.com/live/getRoundPlayVideo'))
-            return 403
-          return value
-        }
-      }
-    })
-    // 拦截fetch
-    W.fetch = new Proxy(W.fetch, {
-      apply: async function (target, _this, args: [RequestInfo, RequestInit | undefined]) {
-        // 屏蔽房间皮肤
-        if (config.menu.noRoomSkin.enable) {
-          if (typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/xlive/app-room/v2/guardTab/topList')) {
-            const response: Response = await Reflect.apply(target, _this, args)
-            const body = await response.json()
-            body.data.info.anchor_guard_achieve_level = 0
-            return new Response(JSON.stringify(body))
-          }
+        // 屏蔽大航海榜单背景图, 太丑了, 啥时候B站更新再取消
+        if (fnStr.includes('/xlive/app-room/v2/guardTab/topList')) {
+          const regexp = /(?<left>\.guard\+" "\+.*?)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.data.*?\.top3)/s
+          const match = fnStr.match(regexp)
+          if (match !== null)
+            fnStr = fnStr.replace(regexp, '$<left>$<mut>.data.info.anchor_guard_achieve_level=0;$<right>')
+          else console.error(GM_info.script.name, '屏蔽大航海背景图失效')
         }
         // 屏蔽视频轮播
         if (config.menu.noRoundPlay.enable) {
-          if (typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/live/getRoundPlayVideo')) {
-            // 为了兼容其他脚本
-            const response: Response = await Reflect.apply(target, _this, args)
-            return new Response(response.body, {
-              status: 403,
-              statusText: 'Forbidden',
-              headers: response.headers
-            })
-          }
-          if (typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo')) {
-            const response: Response = await Reflect.apply(target, _this, args)
-            const body = await response.text()
-            return new Response(body.replace('"live_status":2', '"live_status":0'))
-          }
-        }
-        // 隐身入场
-        if (config.menu.invisible.enable && typeof args[0] === 'string' && args[0].includes('//api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser')) {
-          args[0] = args[0].replace(/room_id=\d+/, 'room_id=273022')
-          const response: Response = await Reflect.apply(target, _this, args)
-          const body = await response.text()
-          return new Response(body.replace('"is_room_admin":false', '"is_room_admin":true'))
-        }
-        return Reflect.apply(target, _this, args)
-      }
-    })
-    // 拦截函数
-    W.webpackChunklive_room = W.webpackChunklive_room || []
-    W.webpackChunklive_room.push = new Proxy(W.webpackChunklive_room.push, {
-      apply: function (target, _this, args) {
-        for (const [name, fn] of Object.entries<Function>(args[0][1])) {
-          let fnStr = fn.toString()
-          // 增强聊天显示
-          if (fnStr.includes('return this.chatList.children.length')) {
-            const regexp = /(?<left>return )this\.chatList\.children\.length/s
-            const match = fnStr.match(regexp)
-            if (match !== null)
-              fnStr = fnStr.replace(regexp, '$<left>[...this.chatList.children].reduce((a,c)=>c.classList.contains("danmaku-item")?a+1:a,0)')
-            else console.error(GM_info.script.name, '增强聊天显示失效')
-          }
-          // 屏蔽房间皮肤
-          if (config.menu.noRoomSkin.enable) {
-            if (fnStr.includes('/xlive/app-room/v2/guardTab/topList')) {
-              const regexp = /(?<left>\.guard\+" "\+.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.data.*?\.top3)/s
-              const match = fnStr.match(regexp)
-              if (match !== null)
-                fnStr = fnStr.replace(regexp, '$<left>$<mut>.data.info.anchor_guard_achieve_level=0;$<right>')
-              else console.error(GM_info.script.name, '屏蔽房间皮肤失效')
-            }
-          }
-          // 屏蔽视频轮
-          if (config.menu.noRoundPlay.enable && fnStr.includes('/xlive/web-room/v2/index/getRoomPlayInfo 接口请求错误')) {
-            const regexp = /(?<left>getRoomPlayInfo\?room_id=.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getRoomPlayInfo 接口请求错误)/s
+          // 进入直播间
+          if (fnStr.includes('/xlive/web-room/v2/index/getRoomPlayInfo 接口请求错误')) {
+            const regexp = /(?<left>getRoomPlayInfo\?room_id=.*?)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getRoomPlayInfo 接口请求错误)/s
             const match = fnStr.match(regexp)
             if (match !== null)
               fnStr = fnStr.replace(regexp, '$<left>if($<mut>.sent.serverResponse.data.live_status===2)$<mut>.sent.serverResponse.data.live_status=0;$<right>')
             else console.error(GM_info.script.name, '屏蔽视频轮播失效')
           }
-          // 屏蔽挂机检测
-          if (config.menu.noSleep.enable && fnStr.includes('prototype.sleep=function(')) {
-            const regexp = /(?<left>prototype\.sleep=function\(.*?\){)/
+          // 下播
+          if (fnStr.includes('case"PREPARING":')) {
+            const regexp = /(?<left>case"PREPARING":)(?<right>\w+\((?<mut>\w+)\);break;)/s
+            const match = fnStr.match(regexp)
+            if (match !== null)
+              fnStr = fnStr.replace(regexp, '$<left>$<mut>.round=0;$<right>')
+            else console.error(GM_info.script.name, '屏蔽下播轮播失效')
+          }
+        }
+        // 屏蔽挂机检测
+        if (config.menu.noSleep.enable) {
+          if (fnStr.includes('prototype.sleep=function(')) {
+            const regexp = /(?<left>prototype\.sleep=function\(\w*\){)/
             const match = fnStr.match(regexp)
             if (match !== null)
               fnStr = fnStr.replace(regexp, '$<left>return;')
             else console.error(GM_info.script.name, '屏蔽挂机检测失效')
           }
-          // 隐身入场
-          if (config.menu.invisible.enable && fnStr.includes('/web-room/v1/index/getInfoByUser 接口请求错误')) {
-            const regexp = /(?<left>getInfoByUser\?room_id=)"\+\w+(?<mid>\+.*)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getInfoByUser 接口请求错误)/s
+        }
+        // 隐身入场
+        if (config.menu.invisible.enable) {
+          // 进入房间
+          if (fnStr.includes('/web-room/v1/index/getInfoByUser 接口请求错误')) {
+            const regexp = /(?<left>not_mock_enter_effect="\+)\w+(?<right>\W)/s
             const match = fnStr.match(regexp)
             if (match !== null)
-              fnStr = fnStr.replace(regexp, '$<left>273022"$<mid>$<mut>.sent.serverResponse.data.badge.is_room_admin=true;$<right>')
-            else console.error(GM_info.script.name, '隐身入场失效')
+              fnStr = fnStr.replace(regexp, '$<left>1$<right>')
+            else console.error(GM_info.script.name, '进入房间隐身失效')
           }
-          if (fn.toString() !== fnStr) args[0][1][name] = str2Fn(fnStr)
+          // 房间心跳
+          if (fnStr.includes('this.enterRoomTracker=new ')) {
+            const regexp = /(?<left>this\.enterRoomTracker=new \w+),/s
+            const match = fnStr.match(regexp)
+            if (match !== null)
+              fnStr = fnStr.replace(regexp, '$<left>,this.enterRoomTracker.report=()=>{},')
+            else console.error(GM_info.script.name, '房间心跳隐身失效')
+          }
         }
-        return Reflect.apply(target, _this, args)
+        if (fn.toString() !== fnStr) args[0][1][name] = str2Fn(fnStr)
       }
-    })
-    // 拦截ws
-    if (config.menu.noRoundPlay.enable) {
-      // @ts-ignore
-      W.bliveproxy.addCommandHandler('PREPARING', command => {
-        delete command.round
-      })
+      return Reflect.apply(target, _this, args)
     }
-    /**
-     * str2Fn
-     *
-     * @param {string} str
-     * @returns {(Function | void)}
-     */
-    function str2Fn(str: string): Function | void {
-      const fnReg = str.match(/^function\((.*?)\){(.*)}$/s)
-      if (fnReg !== null) {
-        const [, args, body] = fnReg
-        const fnStr = [...args.split(','), body]
-        return new Function(...fnStr)
-      }
+  })
+  /**
+   * str2Fn
+   *
+   * @param {string} str
+   * @returns {(Function | void)}
+   */
+  function str2Fn(str: string): Function | void {
+    const fnReg = str.match(/^function[^\(]*?\((.*?)\)[^\{]*?{(.*)}$/s)
+    if (fnReg !== null) {
+      const [, args, body] = fnReg
+      const fnStr = [...args.replaceAll(/\s/g, '').split(','), body]
+      return new Function(...fnStr)
     }
   }
-  // 屏蔽活动皮肤
-  // if (config.menu.noActivityPlat.enable && !document.head.innerHTML.includes('addWaifu')) {
-  //   document.open()
-  //   document.addEventListener('readystatechange', () => {
-  //     if (document.readyState === 'complete') new NoVIP().Start()
-  //   })
-  //   const room4 = await fetch('/4', { credentials: 'include' }).then(res => res.text().catch(() => undefined)).catch(() => undefined)
-  //   if (room4 !== undefined) {
-  //     document.write(room4.replace(/<script>window\.__NEPTUNE_IS_MY_WAIFU__=.*?<\/script>/, ''))
-  //     document.close()
-  //   }
-  // }
   // 屏蔽活动皮肤
   if (config.menu.noActivityPlat.enable) {
     if (self === top) {
@@ -828,6 +743,19 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
     }
   }
   document.addEventListener('readystatechange', () => {
+    if (document.readyState === 'interactive') {
+      // 屏蔽房间皮肤
+      if (W.roomBuffService.mount !== undefined) {
+        W.roomBuffService.mount = new Proxy(W.roomBuffService.mount, {
+          apply: function (target, _this, args) {
+            _this.__NORoomSkin_skin = args[0]
+            if (_this.__NORoomSkin) args[0] = {}
+            return Reflect.apply(target, _this, args)
+          }
+        })
+      }
+    }
+    // 加載菜单
     if (document.readyState === 'complete') new NoVIP().Start()
   })
 }
