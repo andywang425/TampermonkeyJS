@@ -29,7 +29,6 @@
     // "isolatedModules": true,                     /* 将每个文件转换为单独的模块(类似 "ts.transpileModule")。 */
 
     /* 高级选项 */
-    "locale": "zh-cn",                              /* 向用户显示消息时所用的区域设置(例如，"en-us") */
     "skipLibCheck": true,                           /* 跳过声明文件的类型检查。 */
     "forceConsistentCasingInFileNames": true,       /* 不允许对同一文件采用大小不一致的引用。 */
 
