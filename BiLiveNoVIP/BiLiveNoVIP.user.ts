@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.2.1
+// @version     4.2.2
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -637,8 +637,6 @@ if (userConfig.version === undefined || userConfig.version < defaultConfig.versi
 else config = userConfig
 
 if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
-  if (config.menu.noRoundPlay.enable)
-    Reflect.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', {})
   // 拦截函数
   W.webpackChunklive_room = W.webpackChunklive_room || []
   W.webpackChunklive_room.push = new Proxy(W.webpackChunklive_room.push, {
@@ -668,7 +666,8 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
             const regexp = /(?<left>getRoomPlayInfo\?room_id=.*?)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getRoomPlayInfo 接口请求错误)/s
             const match = fnStr.match(regexp)
             if (match !== null)
-              fnStr = fnStr.replace(regexp, '$<left>if($<mut>.sent.serverResponse.data.live_status===2)$<mut>.sent.serverResponse.data.live_status=0;$<right>')
+              fnStr = fnStr.replace('roomInitRes', '__NEPTUNE_IS_MY_WAIFU__')
+                .replace(regexp, '$<left>if($<mut>.sent.serverResponse.data.live_status===2)$<mut>.sent.serverResponse.data.live_status=0;$<right>')
             else console.error(GM_info.script.name, '屏蔽视频轮播失效')
           }
           // 下播
