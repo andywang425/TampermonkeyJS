@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.2.2
+// @version     4.2.3
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -331,6 +331,17 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
   display: none !important;
 }`
     if (config.menu.noGiftControl.enable) cssText += `
+/* 排行榜 */
+.rank-list-section.new,
+.rank-list-section.new .rank-list-ctnr {
+  height: 98px !important;
+}
+/* 调整聊天区 */
+.chat-history-panel.new {
+  height: calc(100% - 98px - 145px) !important;
+}
+/* 排行榜 */
+.rank-list-section.new .rank-list-ctnr,
 /* 人气榜 */
 #head-info-vm .popular-and-hot-rank,
 /* 活动榜 */
