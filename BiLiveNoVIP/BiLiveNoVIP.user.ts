@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.2.3
+// @version     4.2.4
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -434,7 +434,7 @@ body[style*="overflow: hidden;"] {
         const evt = <HTMLInputElement>ev.target
         evt.checked ? selectedCheckBox(itemSpan) : defaultCheckBox(itemSpan)
         config.menu[x].enable = evt.checked
-        GM_setValue('blnvConfig', JSON.stringify(config))
+        GM_setValue('blnvConfig', encodeURI(JSON.stringify(config)))
         this.ChangeCSS()
       })
     }
@@ -632,7 +632,7 @@ const defaultConfig: config = {
     }
   }
 }
-const userConfig = <config>JSON.parse(GM_getValue('blnvConfig', JSON.stringify(defaultConfig)))
+const userConfig = GM_getValue('blnvConfig', null) === null ? defaultConfig : <config>JSON.parse(decodeURI(GM_getValue('blnvConfig')))
 let config: config
 if (userConfig.version === undefined || userConfig.version < defaultConfig.version) {
   for (const x in defaultConfig.menu) {
