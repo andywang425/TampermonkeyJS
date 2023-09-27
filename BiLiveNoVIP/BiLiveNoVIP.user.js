@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        bilibili直播净化
 // @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.2.7
+// @version     4.2.8
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
@@ -309,32 +309,43 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
     if (config.menu.noGiftControl.enable)
       cssText += `
 /* 排行榜 */
-.rank-list-section.new {
+.rank-list-section,
+.rank-list-section.new,
+.rank-list-section.new .rank-list-ctnr[style*="height: 178px;"] {
   height: 98px !important;
 }
-.rank-list-section.new .rank-list-ctnr[style="height: 178px;"] {
-  height: 98px !important;
-}
+.rank-list-section .tab-content,
 .rank-list-section.new .tab-content,
 .rank-list-section.new .guard-rank-cntr .rank-list-cntr {
   min-height: unset !important;
+}
+.rank-list-section .tab-content[style*="height: 95px;"],
+.rank-list-section .gift-rank-cntr .top3-cntr {
+  height: 64px !important;
+}
+.rank-list-section .guard-rank-cntr .top3-cntr > span {
+  height: 32px !important;
 }
 .rank-list-section.new .gift-rank-cntr .top3-cntr,
 .rank-list-section.new .guard-rank-cntr {
   height: unset !important;
 }
 /* 调整聊天区 */
+.chat-history-panel,
 .chat-history-panel.new {
   height: calc(100% - 98px - 145px) !important;
 }
 /* 排行榜 */
-.rank-list-section.new .gift-rank-cntr .top3 > div ~ div ,
-.rank-list-section.new .guard-rank-cntr .top3-cntr > span ~ span ,
+.rank-list-section.new .gift-rank-cntr .top3 > div ~ div,
+.rank-list-section.new .guard-rank-cntr .top3-cntr > span ~ span,
 /* 人气榜 */
 #head-info-vm .popular-and-hot-rank,
-/* 活动榜 */
+/* 礼物星球 */
 #head-info-vm .gift-planet-entry,
+/* 活动榜 */
 #head-info-vm .activity-entry,
+/* 粉丝团  */
+#head-info-vm .follow-ctnr,
 /* 礼物按钮 */
 #web-player-controller-wrap-el .web-live-player-gift-icon-wrap,
 /* 礼物栏 */
