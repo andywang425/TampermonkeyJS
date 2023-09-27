@@ -309,16 +309,27 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
     if (config.menu.noGiftControl.enable)
       cssText += `
 /* 排行榜 */
-.rank-list-section.new,
-.rank-list-section.new .rank-list-ctnr {
+.rank-list-section.new {
   height: 98px !important;
+}
+.rank-list-section.new .rank-list-ctnr[style="height: 178px;"] {
+  height: 98px !important;
+}
+.rank-list-section.new .tab-content,
+.rank-list-section.new .guard-rank-cntr .rank-list-cntr {
+  min-height: unset !important;
+}
+.rank-list-section.new .gift-rank-cntr .top3-cntr,
+.rank-list-section.new .guard-rank-cntr {
+  height: unset !important;
 }
 /* 调整聊天区 */
 .chat-history-panel.new {
   height: calc(100% - 98px - 145px) !important;
 }
 /* 排行榜 */
-.rank-list-section.new .rank-list-ctnr,
+.rank-list-section.new .gift-rank-cntr .top3 > div ~ div ,
+.rank-list-section.new .guard-rank-cntr .top3-cntr > span ~ span ,
 /* 人气榜 */
 #head-info-vm .popular-and-hot-rank,
 /* 活动榜 */
