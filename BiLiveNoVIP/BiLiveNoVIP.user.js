@@ -4,6 +4,7 @@
 // @version     4.2.9
 // @author      lzghzr
 // @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
+// @icon        data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGVsbGlwc2UgY3g9IjE2IiBjeT0iMTYiIHJ4PSIxNSIgcnk9IjE1IiBzdHJva2U9IiMwMGFlZWMiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjx0ZXh0IGZvbnQtZmFtaWx5PSJOb3RvIFNhbnMgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
 // @include     /^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/
 // @match       https://live.bilibili.com/blackboard/*
@@ -504,14 +505,15 @@ body[style*="overflow: hidden;"] {
   border: 2px solid;
   border-radius: 50%;
   display: inline-block;
-  height: 17px;
+  height: 18px;
   text-align: center;
-  width: 17px;
+  width: 18px;
 }
 .gift-block:before {
   content: '滚' !important;
-  font-size: 13px;
+  font-size: 14px;
   vertical-align: top;
+  line-height: 14px;
 }
 /* 多行菜单 */
 .border-box.dialog-ctnr.common-popup-wrap.top-left[style*="width: 200px;"] {
