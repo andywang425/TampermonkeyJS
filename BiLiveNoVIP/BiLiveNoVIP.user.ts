@@ -332,6 +332,13 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 .bili-dm > img {
   display: none !important;
 }`
+    if (config.menu.noLikeBtn.enable) cssText += `
+/* 点赞按钮 */
+#chat-control-panel-vm .like-btn,
+/* 点赞数 */
+#head-info-vm .icon-ctnr:has(.like-icon) {
+  display: none !important;
+}`
     if (config.menu.noGiftControl.enable) cssText += `
 /* 排行榜 */
 .rank-list-section .gift-rank-cntr .top3-cntr .default,
@@ -386,7 +393,7 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 /* 礼物按钮 */
 #web-player-controller-wrap-el .web-live-player-gift-icon-wrap,
 /* 礼物栏 */
-#gift-control-vm .gift-control-panel,
+.gift-control-panel > *:not(.left-part-ctnr),
 #web-player__bottom-bar__container {
   display: none !important;
 }`
@@ -418,7 +425,8 @@ body[style*="overflow: hidden;"] {
 #anchor-guest-box-id,
 #player-effect-vm,
 #chat-draw-area-vm,
-#gift-control-vm .gift-left-part,
+/* 天选之类的 */
+.gift-control-panel .left-part-ctnr,
 .anchor-lottery-entry,
 .popular-main .lottery {
   display: none !important;
@@ -581,7 +589,7 @@ body[style*="overflow: hidden;"] {
 
 // 加载设置
 const defaultConfig: config = {
-  version: 1690375650406,
+  version: 1697634518944,
   menu: {
     noGiftMsg: {
       name: '屏蔽礼物相关',
@@ -606,6 +614,10 @@ const defaultConfig: config = {
     noEmotDanmaku: {
       name: '屏蔽表情弹幕',
       replace: '屏蔽表情弹幕',
+      enable: false
+    },
+    noLikeBtn: {
+      name: '屏蔽点赞按钮',
       enable: false
     },
     noGiftControl: {
