@@ -1,19 +1,22 @@
 // ==UserScript==
-// @name        bilibili直播净化
-// @namespace   https://github.com/lzghzr/GreasemonkeyJS
-// @version     4.2.10
-// @author      lzghzr
-// @description 屏蔽聊天室礼物以及关键字, 净化聊天室环境
-// @icon        data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGVsbGlwc2UgY3g9IjE2IiBjeT0iMTYiIHJ4PSIxNSIgcnk9IjE1IiBzdHJva2U9IiMwMGFlZWMiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjx0ZXh0IGZvbnQtZmFtaWx5PSJOb3RvIFNhbnMgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
-// @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
-// @match       https://live.bilibili.com/*
-// @match       https://www.bilibili.com/blackboard/*
-// @license     MIT
-// @grant       GM_addStyle
-// @grant       GM_getValue
-// @grant       GM_setValue
-// @grant       unsafeWindow
-// @run-at      document-start
+// @name                bilibili直播净化
+// @namespace           https://github.com/lzghzr/GreasemonkeyJS
+// @version             4.2.11
+// @author              lzghzr
+// @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
+// @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGVsbGlwc2UgY3g9IjE2IiBjeT0iMTYiIHJ4PSIxNSIgcnk9IjE1IiBzdHJva2U9IiMwMGFlZWMiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjx0ZXh0IGZvbnQtZmFtaWx5PSJOb3RvIFNhbnMgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
+// @supportURL          https://github.com/lzghzr/GreasemonkeyJS/issues
+// @match               https://live.bilibili.com/*
+// @match               https://www.bilibili.com/blackboard/*
+// @license             MIT
+// @compatible          chrome 需要 105 及以上支持 :has() 伪类
+// @compatible          edge 需要 105 及以上支持 :has() 伪类
+// @incompatible        firefox 暂不支持 :has() 伪类
+// @grant               GM_addStyle
+// @grant               GM_getValue
+// @grant               GM_setValue
+// @grant               unsafeWindow
+// @run-at              document-start
 // ==/UserScript==
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow;
 class NoVIP {
@@ -34,8 +37,9 @@ class NoVIP {
             if (chatNode !== null) {
               const chatText = chatNode.innerText;
               const dateNow = Date.now();
-              if (chatMessage.has(chatText) && dateNow - chatMessage.get(chatText) < 5000)
+              if (chatMessage.has(chatText) && dateNow - chatMessage.get(chatText) < 5000) {
                 addedNode.remove();
+              }
               chatMessage.set(chatText, dateNow);
             }
           }
@@ -50,8 +54,9 @@ class NoVIP {
           if (danmakuNode?.classList?.contains('bili-dm')) {
             const danmakuText = danmakuNode.innerText;
             const dateNow = Date.now();
-            if (danmakuMessage.has(danmakuText) && dateNow - danmakuMessage.get(danmakuText) < 5000)
+            if (danmakuMessage.has(danmakuText) && dateNow - danmakuMessage.get(danmakuText) < 5000) {
               danmakuNode.innerText = '';
+            }
             danmakuMessage.set(danmakuText, dateNow);
           }
         });
@@ -60,12 +65,14 @@ class NoVIP {
     setInterval(() => {
       const dateNow = Date.now();
       chatMessage.forEach((value, key) => {
-        if (dateNow - value > 60 * 1000)
+        if (dateNow - value > 60 * 1000) {
           chatMessage.delete(key);
+        }
       });
       danmakuMessage.forEach((value, key) => {
-        if (dateNow - value > 60 * 1000)
+        if (dateNow - value > 60 * 1000) {
           danmakuMessage.delete(key);
+        }
       });
     }, 60 * 1000);
     const docObserver = new MutationObserver(mutations => {
@@ -73,8 +80,9 @@ class NoVIP {
         mutation.addedNodes.forEach(addedNode => {
           if (addedNode instanceof HTMLDivElement && addedNode.classList.contains('dialog-ctnr')) {
             const blockEffectCtnr = addedNode.querySelector('.block-effect-ctnr');
-            if (blockEffectCtnr !== null)
+            if (blockEffectCtnr !== null) {
               this.AddUI(blockEffectCtnr);
+            }
           }
         });
       });
@@ -132,7 +140,7 @@ class NoVIP {
 .chat-item .user-name {
   color: var(--brand_blue) !important;
 }`;
-    if (config.menu.noGuardIcon.enable)
+    if (config.menu.noGuardIcon.enable) {
       cssText += `
 .chat-item.guard-danmaku .vip-icon {
   margin-right: 4px !important;
@@ -170,6 +178,7 @@ class NoVIP {
 .chat-item.guard-level-2:before {
   display: none !important;
 }`;
+    }
     if (config.menu.noGiftMsg.enable) {
       height -= 32;
       cssText += `
@@ -224,7 +233,7 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
   display: none !important;
 }`;
     }
-    if (config.menu.noSuperChat.enable)
+    if (config.menu.noSuperChat.enable) {
       cssText += `
 /* 调整 SuperChat 聊天框 */
 .chat-history-list {
@@ -295,18 +304,21 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 #chat-control-panel-vm .super-chat {
   display: none !important;
 }`;
-    if (config.menu.noEmoticons.enable)
+    }
+    if (config.menu.noEmoticons.enable) {
       cssText += `
 #chat-control-panel-vm .emoticons-panel,
 .chat-item.chat-emoticon {
   display: none !important;
 }`;
-    if (config.menu.noEmotDanmaku.enable)
+    }
+    if (config.menu.noEmotDanmaku.enable) {
       cssText += `
 .bili-dm > img {
   display: none !important;
 }`;
-    if (config.menu.noLikeBtn.enable)
+    }
+    if (config.menu.noLikeBtn.enable) {
       cssText += `
 /* 点赞按钮 */
 #chat-control-panel-vm .like-btn,
@@ -314,7 +326,8 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 #head-info-vm .icon-ctnr:has(.like-icon) {
   display: none !important;
 }`;
-    if (config.menu.noGiftControl.enable)
+    }
+    if (config.menu.noGiftControl.enable) {
       cssText += `
 /* 排行榜 */
 .rank-list-section .gift-rank-cntr .top3-cntr .default,
@@ -373,7 +386,8 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 #web-player__bottom-bar__container {
   display: none !important;
 }`;
-    if (config.menu.noWealthMedalIcon.enable)
+    }
+    if (config.menu.noWealthMedalIcon.enable) {
       cssText += `
 /* 聊天背景, 存疑 */
 .chat-item.wealth-bubble {
@@ -382,17 +396,20 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 .chat-item .wealth-medal-ctnr {
   display: none !important;
 }`;
-    if (config.menu.noFansMedalIcon.enable)
+    }
+    if (config.menu.noFansMedalIcon.enable) {
       cssText += `
 .chat-item .fans-medal-item-ctnr {
   display: none !important;
 }`;
-    if (config.menu.noLiveTitleIcon.enable)
+    }
+    if (config.menu.noLiveTitleIcon.enable) {
       cssText += `
 .chat-item .title-label {
   display: none !important;
 }`;
-    if (config.menu.noRaffle.enable)
+    }
+    if (config.menu.noRaffle.enable) {
       cssText += `
 body[style*="overflow: hidden;"] {
   overflow-y: overlay !important;
@@ -407,12 +424,14 @@ body[style*="overflow: hidden;"] {
 .popular-main .lottery {
   display: none !important;
 }`;
-    if (config.menu.noDanmakuColor.enable)
+    }
+    if (config.menu.noDanmakuColor.enable) {
       cssText += `
 .bili-dm {
   color: #ffffff !important;
 }`;
-    if (config.menu.noGameId.enable)
+    }
+    if (config.menu.noGameId.enable) {
       cssText += `
 /* PK */
 #pk-vm,
@@ -428,6 +447,7 @@ body[style*="overflow: hidden;"] {
 #chat-control-panel-vm .play-together-entry {
   display: none !important;
 }`;
+    }
     cssText += `
 .chat-history-list.with-penury-gift.with-brush-prompt {
   height: calc(100% - ${height}px) !important;
@@ -439,11 +459,15 @@ body[style*="overflow: hidden;"] {
   }
   AddUI(addedNode) {
     const elmUList = addedNode.firstElementChild;
-    elmUList.childNodes.forEach(child => { if (child instanceof Comment)
-      child.remove(); });
+    elmUList.childNodes.forEach(child => {
+      if (child instanceof Comment) {
+        child.remove();
+      }
+    });
     const listLength = elmUList.childElementCount;
-    if (listLength > 10)
+    if (listLength > 10) {
       return;
+    }
     const changeListener = (itemHTML, x) => {
       const itemSpan = itemHTML.querySelector('span');
       const itemInput = itemHTML.querySelector('input');
@@ -651,8 +675,9 @@ if (userConfig.version === undefined || userConfig.version < defaultConfig.versi
   }
   config = defaultConfig;
 }
-else
+else {
   config = userConfig;
+}
 if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
   W.webpackChunklive_room = W.webpackChunklive_room || [];
   W.webpackChunklive_room.push = new Proxy(W.webpackChunklive_room.push, {
@@ -662,68 +687,83 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
         if (fnStr.includes('return this.chatList.children.length')) {
           const regexp = /(?<left>return )this\.chatList\.children\.length/s;
           const match = fnStr.match(regexp);
-          if (match !== null)
+          if (match !== null) {
             fnStr = fnStr.replace(regexp, '$<left>[...this.chatList.children].reduce((a,c)=>c.classList.contains("danmaku-item")?a+1:a,0)');
-          else
+          }
+          else {
             console.error(GM_info.script.name, '增强聊天显示失效');
+          }
         }
         if (fnStr.includes('/xlive/app-room/v2/guardTab/topList')) {
           const regexp = /(?<left>\.guard\+" "\+.*?)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.data.*?\.top3)/s;
           const match = fnStr.match(regexp);
-          if (match !== null)
+          if (match !== null) {
             fnStr = fnStr.replace(regexp, '$<left>$<mut>.data.info.anchor_guard_achieve_level=0;$<right>');
-          else
+          }
+          else {
             console.error(GM_info.script.name, '屏蔽大航海背景图失效');
+          }
         }
         if (config.menu.noRoundPlay.enable) {
           if (fnStr.includes('/xlive/web-room/v2/index/getRoomPlayInfo 接口请求错误')) {
             const regexp = /(?<left>getRoomPlayInfo\?room_id=.*?)(?<right>return(?:(?!return).)*?(?<mut>\w+)\.sent.*?getRoomPlayInfo 接口请求错误)/s;
             const match = fnStr.match(regexp);
-            if (match !== null)
+            if (match !== null) {
               fnStr = fnStr.replace('roomInitRes', '__NEPTUNE_IS_MY_WAIFU__')
                 .replace(regexp, '$<left>if($<mut>.sent.serverResponse.data.live_status===2)$<mut>.sent.serverResponse.data.live_status=0;$<right>');
-            else
+            }
+            else {
               console.error(GM_info.script.name, '屏蔽视频轮播失效');
+            }
           }
           if (fnStr.includes('case"PREPARING":')) {
             const regexp = /(?<left>case"PREPARING":)(?<right>\w+\((?<mut>\w+)\);break;)/s;
             const match = fnStr.match(regexp);
-            if (match !== null)
+            if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>$<mut>.round=0;$<right>');
-            else
+            }
+            else {
               console.error(GM_info.script.name, '屏蔽下播轮播失效');
+            }
           }
         }
         if (config.menu.noSleep.enable) {
           if (fnStr.includes('prototype.sleep=function(')) {
             const regexp = /(?<left>prototype\.sleep=function\(\w*\){)/;
             const match = fnStr.match(regexp);
-            if (match !== null)
+            if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>return;');
-            else
+            }
+            else {
               console.error(GM_info.script.name, '屏蔽挂机检测失效');
+            }
           }
         }
         if (config.menu.invisible.enable) {
           if (fnStr.includes('/web-room/v1/index/getInfoByUser 接口请求错误')) {
             const regexp = /(?<left>not_mock_enter_effect="\+)\w+(?<right>\W)/s;
             const match = fnStr.match(regexp);
-            if (match !== null)
+            if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>1$<right>');
-            else
+            }
+            else {
               console.error(GM_info.script.name, '进入房间隐身失效');
+            }
           }
           if (fnStr.includes('this.enterRoomTracker=new ')) {
             const regexp = /(?<left>this\.enterRoomTracker=new \w+),/s;
             const match = fnStr.match(regexp);
-            if (match !== null)
+            if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>,this.enterRoomTracker.report=()=>{},');
-            else
+            }
+            else {
               console.error(GM_info.script.name, '房间心跳隐身失效');
+            }
           }
         }
-        if (fn.toString() !== fnStr)
+        if (fn.toString() !== fnStr) {
           args[0][1][name] = str2Fn(fnStr);
+        }
       }
       return Reflect.apply(target, _this, args);
     }
@@ -738,10 +778,12 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
   }
   if (config.menu.noActivityPlat.enable) {
     if (self === top) {
-      if (location.pathname.startsWith('/blanc'))
+      if (location.pathname.startsWith('/blanc')) {
         history.replaceState(null, '', location.href.replace(`${location.origin}/blanc`, location.origin));
-      else
+      }
+      else {
         location.href = location.href.replace(location.origin, `${location.origin}/blanc`);
+      }
     }
     else {
       top?.postMessage(location.origin + location.pathname, 'https://live.bilibili.com');
@@ -754,21 +796,25 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
         W.roomBuffService.mount = new Proxy(W.roomBuffService.mount, {
           apply: function (target, _this, args) {
             _this.__NORoomSkin_skin = args[0];
-            if (_this.__NORoomSkin)
+            if (_this.__NORoomSkin) {
               args[0] = {};
+            }
             return Reflect.apply(target, _this, args);
           }
         });
       }
     }
-    if (document.readyState === 'complete')
+    if (document.readyState === 'complete') {
       new NoVIP().Start();
+    }
   });
 }
 else if (location.href.includes('bilibili.com/blackboard/')) {
-  if (config.menu.noActivityPlat.enable)
+  if (config.menu.noActivityPlat.enable) {
     W.addEventListener("message", msg => {
-      if (msg.origin === 'https://live.bilibili.com' && msg.data.startsWith('https://live.bilibili.com/blanc/'))
+      if (msg.origin === 'https://live.bilibili.com' && msg.data.startsWith('https://live.bilibili.com/blanc/')) {
         location.href = msg.data;
+      }
     });
+  }
 }
