@@ -253,7 +253,7 @@ class NoVIP {
   height: 100% !important;
 }
 /* 超人气推荐 */
-body[style*="overflow: hidden;"] {
+body:not(.player-full-win)[style*="overflow: hidden;"] {
   overflow-y: overlay !important;
 }
 body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
@@ -445,7 +445,7 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
     }
     if (config.menu.noRaffle.enable) {
       cssText += `
-body[style*="overflow: hidden;"] {
+body:not(.player-full-win)[style*="overflow: hidden;"] {
   overflow-y: overlay !important;
 }
 #shop-popover-vm,
