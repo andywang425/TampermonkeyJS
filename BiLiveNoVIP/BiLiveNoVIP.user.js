@@ -37,10 +37,12 @@ class NoVIP {
             if (chatNode !== null) {
               const chatText = chatNode.innerText;
               const dateNow = Date.now();
-              if (chatMessage.has(chatText) && dateNow - chatMessage.get(chatText) < 5000) {
+              if (chatMessage.has(chatText) && dateNow - chatMessage.get(chatText) < 10_000) {
                 addedNode.remove();
               }
-              chatMessage.set(chatText, dateNow);
+              else {
+                chatMessage.set(chatText, dateNow);
+              }
             }
           }
         });
@@ -54,10 +56,12 @@ class NoVIP {
           if (danmakuNode?.classList?.contains('bili-dm')) {
             const danmakuText = danmakuNode.innerText;
             const dateNow = Date.now();
-            if (danmakuMessage.has(danmakuText) && dateNow - danmakuMessage.get(danmakuText) < 5000) {
+            if (danmakuMessage.has(danmakuText) && dateNow - danmakuMessage.get(danmakuText) < 10_000) {
               danmakuNode.innerText = '';
             }
-            danmakuMessage.set(danmakuText, dateNow);
+            else {
+              danmakuMessage.set(danmakuText, dateNow);
+            }
           }
         });
       });
@@ -222,7 +226,7 @@ class NoVIP {
 body:not(.player-full-win)[style*="overflow: hidden;"] {
   overflow-y: overlay !important;
 }
-body:not(.player-full-win)[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
+body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 /* 进场 */
 #brush-prompt,
 .chat-item.misc-msg,
@@ -314,7 +318,7 @@ body:not(.player-full-win)[style*="overflow: hidden;"]>iframe[src*="live-app-hot
     }
     if (config.menu.noEmotDanmaku.enable) {
       cssText += `
-.bili-dm > img {
+.bili-dm > img:not(.bili-icon) {
   display: none !important;
 }`;
     }
@@ -393,6 +397,9 @@ body:not(.player-full-win)[style*="overflow: hidden;"]>iframe[src*="live-app-hot
 .chat-item.wealth-bubble {
   border-image-source: unset !important;
 }
+/* 弹幕 */
+.bili-dm > .bili-icon,
+/* 聊天 */
 .chat-item .wealth-medal-ctnr {
   display: none !important;
 }`;
