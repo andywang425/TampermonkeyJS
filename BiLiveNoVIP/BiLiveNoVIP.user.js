@@ -20,8 +20,6 @@
 // ==/UserScript==
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow;
 class NoVIP {
-  noBBChat = false;
-  noBBDanmaku = false;
   elmStyleCSS;
   chatObserver;
   danmakuObserver;
@@ -38,7 +36,7 @@ class NoVIP {
               const chatText = chatNode.innerText;
               const dateNow = Date.now();
               if (chatMessage.has(chatText) && dateNow - chatMessage.get(chatText) < 10_000) {
-                addedNode.remove();
+                addedNode.classList.add('NoVIP_chat_hide');
               }
               else {
                 chatMessage.set(chatText, dateNow);
@@ -48,6 +46,10 @@ class NoVIP {
         });
       });
     });
+    const elmDivChatList = document.querySelector('#chat-items');
+    if (elmDivChatList !== null) {
+      this.chatObserver.observe(elmDivChatList, { childList: true });
+    }
     const danmakuMessage = new Map();
     this.danmakuObserver = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
@@ -57,7 +59,7 @@ class NoVIP {
             const danmakuText = danmakuNode.innerText;
             const dateNow = Date.now();
             if (danmakuMessage.has(danmakuText) && dateNow - danmakuMessage.get(danmakuText) < 10_000) {
-              danmakuNode.innerText = '';
+              danmakuNode.classList.add('NoVIP_danmaku_hide');
             }
             else {
               danmakuMessage.set(danmakuText, dateNow);
@@ -66,19 +68,23 @@ class NoVIP {
         });
       });
     });
+    const elmDivDanmaku = document.querySelector('#live-player');
+    if (elmDivDanmaku !== null) {
+      this.danmakuObserver.observe(elmDivDanmaku, { childList: true, subtree: true });
+    }
     setInterval(() => {
       const dateNow = Date.now();
       chatMessage.forEach((value, key) => {
-        if (dateNow - value > 60 * 1000) {
+        if (dateNow - value > 60_000) {
           chatMessage.delete(key);
         }
       });
       danmakuMessage.forEach((value, key) => {
-        if (dateNow - value > 60 * 1000) {
+        if (dateNow - value > 60_000) {
           danmakuMessage.delete(key);
         }
       });
-    }, 60 * 1000);
+    }, 60_000);
     const docObserver = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
         mutation.addedNodes.forEach(addedNode => {
@@ -101,32 +107,6 @@ class NoVIP {
     }
     this.ChangeCSS();
   }
-  NOBBChat() {
-    if (config.menu.noBBChat.enable && !this.noBBChat) {
-      const elmDivChatList = document.querySelector('#chat-items');
-      if (elmDivChatList !== null) {
-        this.noBBChat = true;
-        this.chatObserver.observe(elmDivChatList, { childList: true });
-      }
-    }
-    else if (!config.menu.noBBChat.enable && this.noBBChat) {
-      this.noBBChat = false;
-      this.chatObserver.disconnect();
-    }
-  }
-  NOBBDanmaku() {
-    if (config.menu.noBBDanmaku.enable && !this.noBBDanmaku) {
-      const elmDivDanmaku = document.querySelector('#live-player');
-      if (elmDivDanmaku !== null) {
-        this.noBBDanmaku = true;
-        this.danmakuObserver.observe(elmDivDanmaku, { childList: true, subtree: true });
-      }
-    }
-    else if (!config.menu.noBBDanmaku.enable && this.noBBDanmaku) {
-      this.noBBDanmaku = false;
-      this.danmakuObserver.disconnect();
-    }
-  }
   NORoomSkin() {
     if (config.menu.noRoomSkin.enable) {
       W.roomBuffService.__NORoomSkin = true;
@@ -143,6 +123,10 @@ class NoVIP {
 /* 统一用户名颜色 */
 .chat-item .user-name {
   color: var(--brand_blue) !important;
+}
+/* 水印 */
+.live-player-mounter:has(> .web-player-controller-wrap[style*="display: none;"]) .web-player-icon-roomStatus {
+  display: none !important;
 }`;
     if (config.menu.noGuardIcon.enable) {
       cssText += `
@@ -459,8 +443,19 @@ body:not(.player-full-win)[style*="overflow: hidden;"] {
 .chat-history-list.with-penury-gift.with-brush-prompt {
   height: calc(100% - ${height}px) !important;
 }`;
-    this.NOBBChat();
-    this.NOBBDanmaku();
+    if (config.menu.noBBChat.enable) {
+      cssText += `
+.chat-item.NoVIP_chat_hide {
+  display: none !important;
+}`;
+    }
+    if (config.menu.noBBDanmaku.enable) {
+      cssText += `
+.bili-dm.NoVIP_danmaku_hide {
+  color: transparent !important;
+  text-shadow: unset !important;
+}`;
+    }
     this.NORoomSkin();
     this.elmStyleCSS.innerHTML = cssText;
   }
@@ -695,7 +690,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
           const regexp = /(?<left>return )this\.chatList\.children\.length/s;
           const match = fnStr.match(regexp);
           if (match !== null) {
-            fnStr = fnStr.replace(regexp, '$<left>[...this.chatList.children].reduce((a,c)=>c.classList.contains("danmaku-item")?a+1:a,0)');
+            fnStr = fnStr.replace(regexp, '$<left>this.chatList.querySelectorAll(".danmaku-item:not(.NoVIP_hide)").length');
           }
           else {
             console.error(GM_info.script.name, '增强聊天显示失效');
