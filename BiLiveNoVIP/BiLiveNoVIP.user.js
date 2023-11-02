@@ -424,10 +424,15 @@ body:not(.player-full-win)[style*="overflow: hidden;"] {
     }
     if (config.menu.noGameId.enable) {
       cssText += `
+/* 总容器 */
+.web-player-inject-wrap,
 /* PK */
-#pk-vm,
-#awesome-pk-vm,
-#chaos-pk-vm,
+/* #pk-vm, */
+/* #awesome-pk-vm, */
+/* #chaos-pk-vm, */
+/* 多人连麦 */
+/* #multi-voice-index, */
+/* #multi-player, */
 /* 互动游戏 */
 #game-id,
 /* 连麦 */
