@@ -395,7 +395,9 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 #web-player-controller-wrap-el .web-live-player-gift-icon-wrap,
 /* 礼物栏 */
 .gift-control-panel > *:not(.left-part-ctnr),
-#web-player__bottom-bar__container {
+#web-player__bottom-bar__container,
+/* 头像框 */
+.blive-avatar-pendant {
   display: none !important;
 }`
     }
