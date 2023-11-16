@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.12
+// @version             4.2.13
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGVsbGlwc2UgY3g9IjE2IiBjeT0iMTYiIHJ4PSIxNSIgcnk9IjE1IiBzdHJva2U9IiMwMGFlZWMiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjx0ZXh0IGZvbnQtZmFtaWx5PSJOb3RvIFNhbnMgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -146,47 +146,22 @@ class NoVIP {
 /* 统一用户名颜色 */
 .chat-item .user-name {
   color: var(--brand_blue) !important;
-}
-/* 水印 */
-.live-player-mounter:has(> .web-player-controller-wrap[style*="display: none;"]) .web-player-icon-roomStatus {
-  display: none !important;
 }`
     if (config.menu.noGuardIcon.enable) {
       cssText += `
-.chat-item.guard-danmaku .vip-icon {
-  margin-right: 4px !important;
-}
-.chat-item.guard-danmaku .admin-icon,
-.chat-item.guard-danmaku .anchor-icon,
-.chat-item.guard-danmaku .fans-medal-item-ctnr,
-.chat-item.guard-danmaku .guard-icon,
-.chat-item.guard-danmaku .title-label,
-.chat-item.guard-danmaku .user-level-icon,
-.chat-item.guard-danmaku .user-lpl-logo {
-  margin-right: 5px !important;
-}
-.chat-item.guard-level-1,
-.chat-item.guard-level-2 {
-  margin: 0 !important;
-  padding: 4px 5px !important;
-}
+/* 特殊背景 */
 .chat-item.chat-colorful-bubble {
-  background-color: rgba(248, 248, 248, 0) !important;
-  border-radius: 0px !important;
+  background-color: unset !important;
+  border-radius: unset !important;
   display: block !important;
-  margin: 0 !important;
+  margin: unset !important;
 }
-#welcome-area-bottom-vm,
+/* 欢迎提示条 */
+#welcome-area-bottom-vm:has(.sama-avatar-box),
 /* 粉丝勋章内标识 */
 .chat-item .fans-medal-item-ctnr .medal-guard,
-.chat-item.common-danmuku-msg,
-.chat-item.guard-buy,
-.chat-item.welcome-guard,
-.chat-item .guard-icon,
-.chat-item.guard-level-1:after,
-.chat-item.guard-level-2:after,
-.chat-item.guard-level-1:before,
-.chat-item.guard-level-2:before {
+/* 订阅舰长 */
+.chat-item.guard-buy {
   display: none !important;
 }`
     }
@@ -230,18 +205,16 @@ class NoVIP {
 .chat-history-list.with-brush-prompt {
   height: 100% !important;
 }
-/* 超人气推荐 */
-body:not(.player-full-win)[style*="overflow: hidden;"] {
-  overflow-y: overlay !important;
-}
-body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
-/* 进场 */
+/* 聊天下方滚动消息，进场、点赞之类的 */
 #brush-prompt,
-.chat-item.misc-msg,
-/* 初始 */
+/* 初始系统提示 */
 .chat-item.convention-msg,
-/* 点赞 */
-.chat-item[data-type="6"] {
+/* 各种野生消息 */
+.chat-item.common-danmuku-msg,
+/* 各种野生消息 x2 */
+.chat-item.misc-msg,
+/* 各种野生消息 x3 (Toasts) */
+.link-toast {
   display: none !important;
 }`
     }
@@ -310,9 +283,10 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 #chat-msg-bubble-vm,
 /* SuperChat 保留条 */
 #pay-note-panel-vm,
-
 .chat-item .bottom-background,
+/* SuperChat 聊天条 右上角电池 */
 .chat-item .card-item-top-right,
+/* SuperChat 按钮 */
 #chat-control-panel-vm .super-chat {
   display: none !important;
 }`
@@ -334,6 +308,8 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
       cssText += `
 /* 点赞按钮 */
 #chat-control-panel-vm .like-btn,
+/* 点赞消息 */
+.chat-item[data-type="6"],
 /* 点赞数 */
 #head-info-vm .icon-ctnr:has(.like-icon) {
   display: none !important;
@@ -380,6 +356,10 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 .chat-history-panel.new {
   height: calc(100% - 98px - 145px) !important;
 }
+/* 直播分区 */
+.live-area {
+  display: flex !important;
+}
 /* 排行榜 */
 .rank-list-section.new .gift-rank-cntr .top3 > div ~ div,
 .rank-list-section.new .guard-rank-cntr .top3-cntr > span ~ span,
@@ -397,7 +377,9 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 .gift-control-panel > *:not(.left-part-ctnr),
 #web-player__bottom-bar__container,
 /* 头像框 */
-.blive-avatar-pendant {
+.blive-avatar-pendant,
+/* 水印 */
+.web-player-icon-roomStatus {
   display: none !important;
 }`
     }
@@ -407,6 +389,8 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
 .chat-item.wealth-bubble {
   border-image-source: unset !important;
 }
+/* 欢迎提示条 */
+#welcome-area-bottom-vm:has(.wealth-medal),
 /* 弹幕 */
 .bili-dm > .bili-icon,
 /* 聊天 */
@@ -416,7 +400,7 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
     }
     if (config.menu.noFansMedalIcon.enable) {
       cssText += `
-.chat-item .fans-medal-item-ctnr {
+:is(.chat-item, #brush-prompt) .fans-medal-item-ctnr {
   display: none !important;
 }`
     }
@@ -428,7 +412,7 @@ body[style*="overflow: hidden;"]>iframe[src*="live-app-hotrank/result"],
     }
     if (config.menu.noRaffle.enable) {
       cssText += `
-body:not(.player-full-win)[style*="overflow: hidden;"] {
+body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"] {
   overflow-y: overlay !important;
 }
 #shop-popover-vm,
