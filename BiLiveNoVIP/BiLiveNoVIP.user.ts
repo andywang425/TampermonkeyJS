@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.13
+// @version             4.2.14
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGVsbGlwc2UgY3g9IjE2IiBjeT0iMTYiIHJ4PSIxNSIgcnk9IjE1IiBzdHJva2U9IiMwMGFlZWMiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjx0ZXh0IGZvbnQtZmFtaWx5PSJOb3RvIFNhbnMgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -9,9 +9,9 @@
 // @match               https://live.bilibili.com/*
 // @match               https://www.bilibili.com/blackboard/*
 // @license             MIT
-// @compatible          chrome 需要 105 及以上支持 :has() 伪类
-// @compatible          edge 需要 105 及以上支持 :has() 伪类
-// @incompatible        firefox 暂不支持 :has() 伪类
+// @compatible          chrome 基础功能需要 88 以上支持 :not() 伪类，高级功能需要 105 及以上支持 :has() 伪类
+// @compatible          edge 基础功能需要 88 以上支持 :not() 伪类，高级功能需要 105 及以上支持 :has() 伪类
+// @compatible          firefox 基础功能需要 84 以上支持 :not() 伪类，高级功能需要 :has() 伪类，暂不支持
 // @grant               GM_addStyle
 // @grant               GM_getValue
 // @grant               GM_setValue
@@ -163,6 +163,12 @@ class NoVIP {
 /* 订阅舰长 */
 .chat-item.guard-buy {
   display: none !important;
+}
+/* 兼容chrome 105以下版本 */
+@supports not selector(:has(a, b)) {
+  #welcome-area-bottom-vm {
+    display: none !important;
+  }
 }`
     }
     if (config.menu.noGiftMsg.enable) {
@@ -313,6 +319,13 @@ class NoVIP {
 /* 点赞数 */
 #head-info-vm .icon-ctnr:has(.like-icon) {
   display: none !important;
+}
+/* 兼容chrome 105以下版本 */
+@supports not selector(:has(a, b)) {
+  #head-info-vm .like-icon,
+  #head-info-vm .like-text {
+    display: none !important;
+  }
 }`
     }
     if (config.menu.noGiftControl.enable) {
@@ -396,11 +409,20 @@ class NoVIP {
 /* 聊天 */
 .chat-item .wealth-medal-ctnr {
   display: none !important;
+}
+/* 兼容chrome 105以下版本 */
+@supports not selector(:has(a, b)) {
+  #welcome-area-bottom-vm {
+    display: none !important;
+  }
 }`
     }
     if (config.menu.noFansMedalIcon.enable) {
       cssText += `
-:is(.chat-item, #brush-prompt) .fans-medal-item-ctnr {
+/* 聊天 */
+.chat-item .fans-medal-item-ctnr,
+/* 底部提示条 */
+#brush-prompt .fans-medal-item-ctnr {
   display: none !important;
 }`
     }
@@ -424,6 +446,12 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
 .anchor-lottery-entry,
 .popular-main .lottery {
   display: none !important;
+}
+/* 兼容chrome 105以下版本 */
+@supports not selector(:has(a, b)) {
+  body:not(.player-full-win)[style*="overflow: hidden;"] {
+    overflow-y: overlay !important;
+  }
 }`
     }
     if (config.menu.noDanmakuColor.enable) {
