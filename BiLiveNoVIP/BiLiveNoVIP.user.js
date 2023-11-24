@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.14
+// @version             4.2.15
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGVsbGlwc2UgY3g9IjE2IiBjeT0iMTYiIHJ4PSIxNSIgcnk9IjE1IiBzdHJva2U9IiMwMGFlZWMiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjx0ZXh0IGZvbnQtZmFtaWx5PSJOb3RvIFNhbnMgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -56,7 +56,7 @@ class NoVIP {
         mutation.addedNodes.forEach(addedNode => {
           const danmakuNode = addedNode instanceof Text ? addedNode.parentElement : addedNode;
           if (danmakuNode?.classList?.contains('bili-dm')) {
-            const danmakuText = danmakuNode.innerText;
+            const danmakuText = danmakuNode.innerText.split(' ×')[0];
             const dateNow = Date.now();
             if (danmakuMessage.has(danmakuText) && dateNow - danmakuMessage.get(danmakuText) < 10_000) {
               danmakuNode.classList.add('NoVIP_danmaku_hide');
@@ -458,23 +458,31 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
   display: none !important;
 }`;
     }
-    cssText += `
-.chat-history-list.with-penury-gift.with-brush-prompt {
-  height: calc(100% - ${height}px) !important;
-}`;
     if (config.menu.noBBChat.enable) {
       cssText += `
+/* 官方 */
+#aside-area-vm #combo-card,
+/* 自定义 */
 .chat-item.NoVIP_chat_hide {
   display: none !important;
 }`;
     }
     if (config.menu.noBBDanmaku.enable) {
       cssText += `
+/* 官方 */
+.danmaku-item-container .combo {
+  display: none !important;
+}
+/* 自定义 */
 .bili-dm.NoVIP_danmaku_hide {
   color: transparent !important;
   text-shadow: unset !important;
 }`;
     }
+    cssText += `
+.chat-history-list.with-penury-gift.with-brush-prompt {
+  height: calc(100% - ${height}px) !important;
+}`;
     this.NORoomSkin();
     this.elmStyleCSS.innerHTML = cssText;
   }
