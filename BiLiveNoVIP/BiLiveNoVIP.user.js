@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.15
+// @version             4.2.16
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGVsbGlwc2UgY3g9IjE2IiBjeT0iMTYiIHJ4PSIxNSIgcnk9IjE1IiBzdHJva2U9IiMwMGFlZWMiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjx0ZXh0IGZvbnQtZmFtaWx5PSJOb3RvIFNhbnMgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -231,7 +231,8 @@ class NoVIP {
 .chat-item .superChat-base .fans-medal-item-ctnr {
   margin-right: 4px !important;
 }
-.chat-item .name {
+.chat-item .name,
+.chat-item .card-item-name {
   color: var(--brand_blue) !important;
   display: unset !important;
   font-size: unset !important;
@@ -247,7 +248,8 @@ class NoVIP {
   width: unset !important;
 }
 /* 为 SuperChat 用户名添加 : */
-.chat-item.superChat-card-detail .name:after {
+.chat-item.superChat-card-detail .name:after,
+.chat-item.superChat-card-detail .card-item-name:after {
   content: ' : ';
 }
 .chat-item .card-item-middle-bottom {
@@ -470,7 +472,8 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
     if (config.menu.noBBDanmaku.enable) {
       cssText += `
 /* 官方 */
-.danmaku-item-container .combo {
+.danmaku-item-container .combo,
+.danmaku-item-container .mode-adv {
   display: none !important;
 }
 /* 自定义 */
