@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.17
+// @version             4.2.18
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGVsbGlwc2UgY3g9IjE2IiBjeT0iMTYiIHJ4PSIxNSIgcnk9IjE1IiBzdHJva2U9IiMwMGFlZWMiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjx0ZXh0IGZvbnQtZmFtaWx5PSJOb3RvIFNhbnMgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -196,7 +196,9 @@ class NoVIP {
 /* 各种野生消息 x2 */
 .chat-item.misc-msg,
 /* 各种野生消息 x3 (Toasts) */
-.link-toast {
+.link-toast,
+/* pk */
+.chat-item.new-video-pk-item-dm {
   display: none !important;
 }`;
     }
@@ -233,7 +235,6 @@ class NoVIP {
 }
 .chat-item .name,
 .chat-item .card-item-name {
-  color: var(--brand_blue) !important;
   display: unset !important;
   font-size: unset !important;
   font-weight: unset !important;
@@ -247,9 +248,12 @@ class NoVIP {
   white-space: unset !important;
   width: unset !important;
 }
+.chat-item .card-item-name>span {
+  color: var(--brand_blue) !important;
+}
 /* 为 SuperChat 用户名添加 : */
 .chat-item.superChat-card-detail .name:after,
-.chat-item.superChat-card-detail .card-item-name:after {
+.chat-item.superChat-card-detail .card-item-name>span:after {
   content: ' : ';
 }
 .chat-item .card-item-middle-bottom {
