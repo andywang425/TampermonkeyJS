@@ -56,13 +56,16 @@ class NoVIP {
         mutation.addedNodes.forEach(addedNode => {
           const danmakuNode = addedNode instanceof Text ? addedNode.parentElement : addedNode;
           if (danmakuNode?.classList?.contains('bili-dm')) {
-            const danmakuText = danmakuNode.innerText.split(' ×')[0];
+            const danmakuText = danmakuNode.innerText.split(/ ?[x×]\d+$/);
             const dateNow = Date.now();
-            if (danmakuMessage.has(danmakuText) && dateNow - danmakuMessage.get(danmakuText) < 10_000) {
+            if (danmakuMessage.has(danmakuText[0]) && dateNow - danmakuMessage.get(danmakuText[0]) < 10_000) {
+              danmakuNode.classList.add('NoVIP_danmaku_hide');
+            }
+            else if (danmakuText[1] !== undefined) {
               danmakuNode.classList.add('NoVIP_danmaku_hide');
             }
             else {
-              danmakuMessage.set(danmakuText, dateNow);
+              danmakuMessage.set(danmakuText[0], dateNow);
             }
           }
         });
