@@ -373,6 +373,8 @@ class NoVIP {
 #web-player__bottom-bar__container,
 /* 头像框 */
 .blive-avatar-pendant,
+/* 主播地址 */
+.anchor-location,
 /* 水印 */
 .web-player-icon-roomStatus {
   display: none !important;
