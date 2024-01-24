@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.19
+// @version             4.2.20
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGVsbGlwc2UgY3g9IjE2IiBjeT0iMTYiIHJ4PSIxNSIgcnk9IjE1IiBzdHJva2U9IiMwMGFlZWMiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjx0ZXh0IGZvbnQtZmFtaWx5PSJOb3RvIFNhbnMgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -132,6 +132,7 @@ class NoVIP {
 /* 特殊背景 */
 .chat-item.chat-colorful-bubble {
   background-color: unset !important;
+  border-image-source: unset !important;
   border-radius: unset !important;
   display: block !important;
   margin: unset !important;
@@ -373,7 +374,7 @@ class NoVIP {
 #web-player__bottom-bar__container,
 /* 头像框 */
 .blive-avatar-pendant,
-/* 主播地址 */
+/* 主播城市 */
 .anchor-location,
 /* 水印 */
 .web-player-icon-roomStatus {
