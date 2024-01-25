@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.21
+// @version             4.2.22
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
-// @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGVsbGlwc2UgY3g9IjE2IiBjeT0iMTYiIHJ4PSIxNSIgcnk9IjE1IiBzdHJva2U9IiMwMGFlZWMiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjx0ZXh0IGZvbnQtZmFtaWx5PSJOb3RvIFNhbnMgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
+// @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8ZWxsaXBzZSBjeD0iMTYiIGN5PSIxNiIgcng9IjE1IiByeT0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8dGV4dCBmb250LWZhbWlseT0iTm90byBTYW5zIFNDIiBmb250LXNpemU9IjIyIiB4PSI1IiB5PSIyMyIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pgo8L3N2Zz4=
 // @supportURL          https://github.com/lzghzr/GreasemonkeyJS/issues
 // @match               https://live.bilibili.com/*
 // @match               https://www.bilibili.com/blackboard/*
@@ -569,20 +569,6 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
   }
   AddCSS() {
     GM_addStyle(`
-.gift-block {
-  border: 2px solid;
-  border-radius: 50%;
-  display: inline-block;
-  height: 18px;
-  text-align: center;
-  width: 18px;
-}
-.gift-block:before {
-  content: '滚' !important;
-  font-size: 14px;
-  vertical-align: top;
-  line-height: 14px;
-}
 /* 多行菜单 */
 .border-box.dialog-ctnr.common-popup-wrap.top-left[style*="width: 200px;"] {
   width: 270px !important;
@@ -725,6 +711,20 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
     apply: function (target, _this, args) {
       for (const [name, fn] of Object.entries(args[0][1])) {
         let fnStr = fn.toString();
+        if (fnStr.includes('staticClass:"block-effect-icon-root"')) {
+          const regexp = /(?<left>staticClass:"block-effect-icon-root"\},\[)"on"===(?<mut_t>\w+)\.blockEffectStatus\?(?<svg>(?<mut_n>\w+)\("svg".*?)\[\k<mut_n>\("path".*?blockEffectIconColor\}\}\)\]/s;
+          const match = fnStr.match(regexp);
+          if (match !== null) {
+            fnStr = fnStr.replace(regexp, '$<left>$<svg>\[\
+$<mut_n>("ellipse",{attrs:{cx:"12",cy:"12",rx:"10",ry:"10",stroke:$<mut_t>.blockEffectIconColor,"stroke-width":"1.5",fill:"none"}}),\
+$<mut_t>._v(" "),\
+$<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"17",fill:$<mut_t>.blockEffectIconColor}},[$<mut_t>._v("滚")])\
+]');
+          }
+          else {
+            console.error(GM_info.script.name, '插入脚本 icon 失效');
+          }
+        }
         if (fnStr.includes('return this.chatList.children.length')) {
           const regexp = /(?<left>return )this\.chatList\.children\.length/s;
           const match = fnStr.match(regexp);
