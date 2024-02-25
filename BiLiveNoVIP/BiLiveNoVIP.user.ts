@@ -472,6 +472,8 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
     }
     if (config.menu.noGameId.enable) {
       cssText += `
+/* 遮罩 */
+#web-player-module-area-mask-panel,
 /* 总容器 */
 .web-player-inject-wrap,
 /* PK */
