@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.22
+// @version             4.2.23
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8ZWxsaXBzZSBjeD0iMTYiIGN5PSIxNiIgcng9IjE1IiByeT0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8dGV4dCBmb250LWZhbWlseT0iTm90byBTYW5zIFNDIiBmb250LXNpemU9IjIyIiB4PSI1IiB5PSIyMyIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pgo8L3N2Zz4=
@@ -907,9 +907,26 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
       if (W.roomBuffService.mount !== undefined) {
         W.roomBuffService.mount = new Proxy(W.roomBuffService.mount, {
           apply: function (target, _this, args) {
-            _this.__NORoomSkin_skin = args[0]
-            if (_this.__NORoomSkin) {
-              args[0] = {}
+            if (args[0] !== undefined) {
+              _this.__NORoomSkin_skin = args[0]
+              if (args[0].id !== 0) {
+                _this.__NORoomSkin_skin_id = args[0].id
+              }
+              if (_this.__NORoomSkin) {
+                args[0].id = 0
+                args[0] = {}
+              }
+              else if (args[0].id === 0 && args[0].start_time !== 0) {
+                args[0].id = _this.__NORoomSkin_skin_id || 0
+              }
+            }
+            return Reflect.apply(target, _this, args)
+          }
+        })
+        W.roomBuffService.unmount = new Proxy(W.roomBuffService.unmount, {
+          apply: function (target, _this, args) {
+            if (_this.__NORoomSkin_skin !== undefined) {
+              _this.__NORoomSkin_skin.id = 0
             }
             return Reflect.apply(target, _this, args)
           }
