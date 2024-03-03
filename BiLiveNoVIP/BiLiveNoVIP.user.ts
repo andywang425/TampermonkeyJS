@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.23
+// @version             4.2.24
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8ZWxsaXBzZSBjeD0iMTYiIGN5PSIxNiIgcng9IjE1IiByeT0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8dGV4dCBmb250LWZhbWlseT0iTm90byBTYW5zIFNDIiBmb250LXNpemU9IjIyIiB4PSI1IiB5PSIyMyIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pgo8L3N2Zz4=
@@ -402,7 +402,10 @@ class NoVIP {
 /* 主播城市 */
 .anchor-location,
 /* 水印 */
-.web-player-icon-roomStatus {
+.web-player-icon-roomStatus,
+.blur-edges-ctnr,
+/* 遮罩 */
+#web-player-module-area-mask-panel {
   display: none !important;
 }`
     }
@@ -472,8 +475,6 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
     }
     if (config.menu.noGameId.enable) {
       cssText += `
-/* 遮罩 */
-#web-player-module-area-mask-panel,
 /* 总容器 */
 .web-player-inject-wrap,
 /* PK */
@@ -758,6 +759,24 @@ else {
 }
 
 if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
+  // 拦截反屏蔽
+  W.getComputedStyle = new Proxy(W.getComputedStyle, {
+    apply: function (target, _this, args) {
+      if (args !== undefined && args[0] instanceof HTMLElement) {
+        let htmlEle = Reflect.apply(target, _this, args)
+        htmlEle = new Proxy(htmlEle, {
+          get: function (_target, propertyKey) {
+            if (propertyKey === 'display' && _target[propertyKey] === 'none') {
+              return 'block'
+            }
+            return Reflect.get(_target, propertyKey)
+          }
+        })
+        return htmlEle
+      }
+      return Reflect.apply(target, _this, args)
+    }
+  })
   // 拦截函数
   W.webpackChunklive_room = W.webpackChunklive_room || []
   W.webpackChunklive_room.push = new Proxy(W.webpackChunklive_room.push, {
