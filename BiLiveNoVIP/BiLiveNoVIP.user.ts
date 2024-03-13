@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.24
+// @version             4.2.25
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8ZWxsaXBzZSBjeD0iMTYiIGN5PSIxNiIgcng9IjE1IiByeT0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8dGV4dCBmb250LWZhbWlseT0iTm90byBTYW5zIFNDIiBmb250LXNpemU9IjIyIiB4PSI1IiB5PSIyMyIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pgo8L3N2Zz4=
@@ -160,16 +160,22 @@ class NoVIP {
   display: block !important;
   margin: unset !important;
 }
+/* 特殊背景 */
+.chat-item.chat-colorful-bubble div:has(div[style*="border-image-source"]),
 /* 欢迎提示条 */
 #welcome-area-bottom-vm:has(.sama-avatar-box),
 /* 粉丝勋章内标识 */
 .chat-item .fans-medal-item-ctnr .medal-guard,
+/* 舰队指挥官标识 */
+.chat-item .pilot-icon,
+.chat-item .pilot-icon ~ br,
 /* 订阅舰长 */
 .chat-item.guard-buy {
   display: none !important;
 }
 /* 兼容chrome 105以下版本 */
 @supports not selector(:has(a, b)) {
+  .chat-item.chat-colorful-bubble div[style*="border-image-source"]
   #welcome-area-bottom-vm {
     display: none !important;
   }
@@ -194,6 +200,9 @@ class NoVIP {
 .chat-item .rank-icon,
 /* 分享直播间 */
 .chat-item.important-prompt-item,
+/* 礼物栏 */
+.gift-control-panel > *:not(.left-part-ctnr),
+#web-player__bottom-bar__container,
 
 #chat-gift-bubble-vm,
 #penury-gift-msg,
@@ -357,11 +366,11 @@ class NoVIP {
 .rank-list-section.new .rank-list-ctnr[style*="height: 178px;"] {
   height: 98px !important;
 }
-.rank-list-section .tab-content,
+.rank-list-section .tab-content-pilot,
 .rank-list-section.new .guard-rank-cntr .rank-list-cntr {
   min-height: unset !important;
 }
-.rank-list-section .tab-content[style*="height: 95px;"],
+.rank-list-section .tab-content-pilot[style*="height: 9"],
 .rank-list-section .gift-rank-cntr .top3-cntr {
   height: 64px !important;
 }
@@ -394,9 +403,6 @@ class NoVIP {
 #head-info-vm .follow-ctnr,
 /* 礼物按钮 */
 #web-player-controller-wrap-el .web-live-player-gift-icon-wrap,
-/* 礼物栏 */
-.gift-control-panel > *:not(.left-part-ctnr),
-#web-player__bottom-bar__container,
 /* 头像框 */
 .blive-avatar-pendant,
 /* 主播城市 */
@@ -491,7 +497,9 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
 /* 帮玩 */
 #chat-control-panel-vm .play-together-service-card-container,
 /* 一起玩 */
-#chat-control-panel-vm .play-together-entry {
+#chat-control-panel-vm .play-together-entry,
+/* 神秘人 */
+.chat-item .common-nickname-medal {
   display: none !important;
 }`
     }
@@ -499,6 +507,8 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
       cssText += `
 /* 官方 */
 #aside-area-vm #combo-card,
+#aside-area-vm #combo-danmaku-vm,
+#aside-area-vm .vote-card,
 /* 自定义 */
 .chat-item.NoVIP_chat_hide {
   display: none !important;
@@ -648,7 +658,7 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
 
 // 加载设置
 const defaultConfig: config = {
-  version: 1697634518944,
+  version: 1710342294818,
   menu: {
     noGiftMsg: {
       name: '屏蔽礼物相关',
@@ -680,7 +690,7 @@ const defaultConfig: config = {
       enable: false
     },
     noGiftControl: {
-      name: '屏蔽礼物控件',
+      name: '屏蔽活动控件',
       enable: false
     },
     noGuardIcon: {
@@ -795,7 +805,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
 ]')
           }
           else {
-            console.error(GM_info.script.name, '插入脚本 icon 失效')
+            console.error(GM_info.script.name, '插入脚本 icon 失效', fnStr)
           }
         }
         // 增强聊天显示
@@ -806,7 +816,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
             fnStr = fnStr.replace(regexp, '$<left>this.chatList.querySelectorAll(".danmaku-item:not(.NoVIP_hide)").length')
           }
           else {
-            console.error(GM_info.script.name, '增强聊天显示失效')
+            console.error(GM_info.script.name, '增强聊天显示失效', fnStr)
           }
         }
         // 屏蔽大航海榜单背景图, 太丑了, 啥时候B站更新再取消
@@ -817,7 +827,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
             fnStr = fnStr.replace(regexp, '$<left>$<mut>.data.info.anchor_guard_achieve_level=0;$<right>')
           }
           else {
-            console.error(GM_info.script.name, '屏蔽大航海背景图失效')
+            console.error(GM_info.script.name, '屏蔽大航海背景图失效', fnStr)
           }
         }
         // 屏蔽视频轮播
@@ -831,7 +841,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
                 .replace(regexp, '$<left>if($<mut>.sent.serverResponse.data.live_status===2)$<mut>.sent.serverResponse.data.live_status=0;$<right>')
             }
             else {
-              console.error(GM_info.script.name, '屏蔽视频轮播失效')
+              console.error(GM_info.script.name, '屏蔽视频轮播失效', fnStr)
             }
           }
           // 下播
@@ -842,7 +852,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
               fnStr = fnStr.replace(regexp, '$<left>$<mut>.round=0;$<right>')
             }
             else {
-              console.error(GM_info.script.name, '屏蔽下播轮播失效')
+              console.error(GM_info.script.name, '屏蔽下播轮播失效', fnStr)
             }
           }
         }
@@ -855,7 +865,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
               fnStr = fnStr.replace(regexp, '$<left>return;')
             }
             else {
-              console.error(GM_info.script.name, '屏蔽挂机检测失效')
+              console.error(GM_info.script.name, '屏蔽挂机检测失效', fnStr)
             }
           }
         }
@@ -869,7 +879,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
               fnStr = fnStr.replace(regexp, '$<left>1$<right>')
             }
             else {
-              console.error(GM_info.script.name, '进入房间隐身失效')
+              console.error(GM_info.script.name, '进入房间隐身失效', fnStr)
             }
           }
           // 房间心跳
@@ -880,12 +890,37 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
               fnStr = fnStr.replace(regexp, '$<left>,this.enterRoomTracker.report=()=>{},')
             }
             else {
-              console.error(GM_info.script.name, '房间心跳隐身失效')
+              console.error(GM_info.script.name, '房间心跳隐身失效', fnStr)
             }
           }
         }
         if (fn.toString() !== fnStr) {
           args[0][1][name] = str2Fn(fnStr)
+        }
+      }
+      return Reflect.apply(target, _this, args)
+    }
+  })
+  Set.prototype.add = new Proxy(Set.prototype.add, {
+    apply: function (target, _this, args) {
+      if (args[0] && args[0] instanceof Function) {
+        let fnStr = args[0].toString()
+        // 屏蔽视频轮播
+        if (config.menu.noRoundPlay.enable) {
+          // 下播
+          if (fnStr.includes('.Preparing:')) {
+            const regexp = /(?<left>Preparing:)(?<right>.*?1===(?<mut>\w+)\.round)/s
+            const match = fnStr.match(regexp)
+            if (match !== null) {
+              fnStr = fnStr.replace(regexp, '$<left>$<mut>.round=0;$<right>')
+            }
+            else {
+              console.error(GM_info.script.name, '屏蔽下播轮播失效', fnStr)
+            }
+          }
+        }
+        if (args[0].toString() !== fnStr) {
+          args[0] = str2Fn(fnStr)
         }
       }
       return Reflect.apply(target, _this, args)
@@ -898,11 +933,11 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
    * @returns {(Function | void)}
    */
   function str2Fn(str: string): Function | void {
-    const fnReg = str.match(/^function[^\(]*?\((.*?)\)[^\{]*?{(.*)}$/s)
+    const fnReg = str.match(/([^\{]*)\{(.*)\}$/s)
     if (fnReg !== null) {
-      const [, args, body] = fnReg
-      const fnStr = [...args.replaceAll(/\s/g, '').split(','), body]
-      return new Function(...fnStr)
+      const [, head, body] = fnReg
+      const args = head.replaceAll(/function[^\(]*|[\s()=>]/g, '').split(',')
+      return new Function(...args, body)
     }
   }
   // 屏蔽活动皮肤
