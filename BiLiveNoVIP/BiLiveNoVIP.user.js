@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.26
+// @version             4.2.27
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8ZWxsaXBzZSBjeD0iMTYiIGN5PSIxNiIgcng9IjE1IiByeT0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8dGV4dCBmb250LWZhbWlseT0iTm90byBTYW5zIFNDIiBmb250LXNpemU9IjIyIiB4PSI1IiB5PSIyMyIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pgo8L3N2Zz4=
@@ -342,10 +342,12 @@ class NoVIP {
 .rank-list-section.new .rank-list-ctnr[style*="height: 178px;"] {
   height: 98px !important;
 }
+.rank-list-section .tab-content,
 .rank-list-section .tab-content-pilot,
 .rank-list-section.new .guard-rank-cntr .rank-list-cntr {
   min-height: unset !important;
 }
+.rank-list-section .tab-content[style*="height: 9"],
 .rank-list-section .tab-content-pilot[style*="height: 9"],
 .rank-list-section .gift-rank-cntr .top3-cntr {
   height: 64px !important;
