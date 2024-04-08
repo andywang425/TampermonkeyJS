@@ -59,11 +59,25 @@ interface rgWalletInfo {
 }
 // 百度汇率
 interface baiduExch {
-  status: string
-  data: exchData[]
+  ResultCode: number
+  ResultNum: number
+  QueryID: string
+  Result: baiduExchResult
 }
-interface exchData {
-  number2: string
+interface baiduExchResult {
+  pankouinfos: baiduExchResultPankouinfos
+}
+interface baiduExchResultPankouinfos {
+  indicatorTitle: string
+  indicatorUrl: string
+  list: baiduExchResultPankouinfosList[]
+}
+interface baiduExchResultPankouinfosList {
+  ename: string
+  name: string
+  value: string
+  status: string
+  originValue: string
 }
 // 物品价格
 interface priceoverview {

@@ -7,7 +7,7 @@
 // @supportURL  https://github.com/lzghzr/GreasemonkeyJS/issues
 // @match       http://steamcommunity.com/*/inventory/
 // @match       https://steamcommunity.com/*/inventory/
-// @connect     sp0.baidu.com
+// @connect     finance.pae.baidu.com
 // @license     MIT
 // @grant       GM_addStyle
 // @grant       GM_xmlhttpRequest
@@ -150,10 +150,15 @@ async function addUI() {
   const baiduExch = await XHR<baiduExch>({
     GM: true,
     method: 'GET',
-    url: `https://sp0.baidu.com/8aQDcjqpAAV3otqbppnN2DJv/api.php?query=1%E7%BE%8E%E5%85%83%E7%AD%89%E4%BA%8E%E5%A4%9A%E5%B0%91%E4%BA%BA%E6%B0%91%E5%B8%81&resource_id=6017&t=${Date.now()}&ie=utf8&oe=utf8&format=json&tn=baidu`,
+    url: 'https://finance.pae.baidu.com/vapi/v1/getquotation?group=huilv_minute&need_reverse_real=1&code=USDCNY',
     responseType: 'json',
   })
-  if (baiduExch?.body?.data[0] !== undefined && baiduExch.response.status === 200) gInputUSDCNY.value = baiduExch.body.data[0].number2
+  if (baiduExch?.body?.Result !== undefined && baiduExch.response.status === 200) {
+    baiduExch.body.Result.pankouinfos.list.forEach(list => {
+      if (list.ename === 'preClose') gInputUSDCNY.value = list.value
+    })
+
+  }
 }
 /**
  * 获取美元区价格
