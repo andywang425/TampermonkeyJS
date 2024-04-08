@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.27
+// @version             4.2.28
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8ZWxsaXBzZSBjeD0iMTYiIGN5PSIxNiIgcng9IjE1IiByeT0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8dGV4dCBmb250LWZhbWlseT0iTm90byBTYW5zIFNDIiBmb250LXNpemU9IjIyIiB4PSI1IiB5PSIyMyIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pgo8L3N2Zz4=
@@ -152,7 +152,7 @@ class NoVIP {
 }`
     if (config.menu.noGuardIcon.enable) {
       cssText += `
-/* 特殊背景 */
+/* 聊天背景 */
 .chat-item.chat-colorful-bubble {
   background-color: unset !important;
   border-image-source: unset !important;
@@ -160,7 +160,7 @@ class NoVIP {
   display: block !important;
   margin: unset !important;
 }
-/* 特殊背景 */
+/* 聊天背景 */
 .chat-item.chat-colorful-bubble div:has(div[style*="border-image-source"]),
 /* 欢迎提示条 */
 #welcome-area-bottom-vm:has(.sama-avatar-box),
@@ -422,6 +422,15 @@ class NoVIP {
 /* 聊天背景, 存疑 */
 .chat-item.wealth-bubble {
   border-image-source: unset !important;
+}
+/* 聊天背景, 存疑 */
+.chat-item.has-bubble {
+  border-image-source: unset !important;
+  border-image-slice: unset !important;
+  border-image-width: unset !important;
+  box-sizing: unset !important;
+  display: block !important;
+  margin: unset !important;
 }
 /* 欢迎提示条 */
 #welcome-area-bottom-vm:has(.wealth-medal),
