@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.28
+// @version             4.2.29
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -176,6 +176,36 @@ class NoVIP {
 /* 兼容chrome 105以下版本 */
 @supports not selector(:has(a, b)) {
   .chat-item.chat-colorful-bubble div[style*="border-image-source"]
+  #welcome-area-bottom-vm {
+    display: none !important;
+  }
+}`
+    }
+    if (config.menu.noWealthMedalIcon.enable) {
+      cssText += `
+/* 聊天背景, 存疑 */
+.chat-item.wealth-bubble {
+  border-image-source: unset !important;
+}
+/* 聊天背景, 存疑 */
+.chat-item.has-bubble {
+  border-image-source: unset !important;
+  border-image-slice: unset !important;
+  border-image-width: unset !important;
+  box-sizing: unset !important;
+  display: block !important;
+  margin: unset !important;
+}
+/* 欢迎提示条 */
+#welcome-area-bottom-vm:has(.wealth-medal),
+/* 弹幕 */
+.bili-dm > .bili-icon,
+/* 聊天 */
+.chat-item .wealth-medal-ctnr {
+  display: none !important;
+}
+/* 兼容chrome 105以下版本 */
+@supports not selector(:has(a, b)) {
   #welcome-area-bottom-vm {
     display: none !important;
   }
@@ -415,36 +445,6 @@ class NoVIP {
 /* 遮罩 */
 #web-player-module-area-mask-panel {
   display: none !important;
-}`
-    }
-    if (config.menu.noWealthMedalIcon.enable) {
-      cssText += `
-/* 聊天背景, 存疑 */
-.chat-item.wealth-bubble {
-  border-image-source: unset !important;
-}
-/* 聊天背景, 存疑 */
-.chat-item.has-bubble {
-  border-image-source: unset !important;
-  border-image-slice: unset !important;
-  border-image-width: unset !important;
-  box-sizing: unset !important;
-  display: block !important;
-  margin: unset !important;
-}
-/* 欢迎提示条 */
-#welcome-area-bottom-vm:has(.wealth-medal),
-/* 弹幕 */
-.bili-dm > .bili-icon,
-/* 聊天 */
-.chat-item .wealth-medal-ctnr {
-  display: none !important;
-}
-/* 兼容chrome 105以下版本 */
-@supports not selector(:has(a, b)) {
-  #welcome-area-bottom-vm {
-    display: none !important;
-  }
 }`
     }
     if (config.menu.noFansMedalIcon.enable) {
