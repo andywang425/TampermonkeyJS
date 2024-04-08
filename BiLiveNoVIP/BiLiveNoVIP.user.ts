@@ -4,7 +4,7 @@
 // @version             4.2.28
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
-// @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8ZWxsaXBzZSBjeD0iMTYiIGN5PSIxNiIgcng9IjE1IiByeT0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8dGV4dCBmb250LWZhbWlseT0iTm90byBTYW5zIFNDIiBmb250LXNpemU9IjIyIiB4PSI1IiB5PSIyMyIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pgo8L3N2Zz4=
+// @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
 // @supportURL          https://github.com/lzghzr/GreasemonkeyJS/issues
 // @match               https://live.bilibili.com/*
 // @match               https://www.bilibili.com/blackboard/*
@@ -811,7 +811,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
           const match = fnStr.match(regexp)
           if (match !== null) {
             fnStr = fnStr.replace(regexp, '$<left>$<svg>\[\
-$<mut_n>("ellipse",{attrs:{cx:"12",cy:"12",rx:"10",ry:"10",stroke:$<mut_t>.blockEffectIconColor,"stroke-width":"1.5",fill:"none"}}),\
+$<mut_n>("circle",{attrs:{cx:"12",cy:"12",r:"10",stroke:$<mut_t>.blockEffectIconColor,"stroke-width":"1.5",fill:"none"}}),\
 $<mut_t>._v(" "),\
 $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"17",fill:$<mut_t>.blockEffectIconColor}},[$<mut_t>._v("滚")])\
 ]')
