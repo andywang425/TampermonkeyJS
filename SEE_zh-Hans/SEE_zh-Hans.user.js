@@ -8,7 +8,7 @@
 // @include     *://steamcommunity.com/profiles/*/inventory*
 // @include     *://steamcommunity.com/market*
 // @include     *://steamcommunity.com/tradeoffer*
-// @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@a12e5f5baeea9c13a3dc2b6cac4b6ecef29533d5/libReplaceText/libReplaceText.js
+// @require     https://github.com/lzghzr/TampermonkeyJS/raw/75a1a97c8b010f78f986fa2c56646e910af419e2/libReplaceText/libReplaceText.js#sha256-zjITNEjaUMqzPJSSjGkZp6J7uHKibg4dBo6BbnJjG/k=
 // @license     MIT
 // @grant       none
 // @run-at      document-start
