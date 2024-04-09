@@ -6,7 +6,7 @@
 // @description I am Groot!
 // @match       http://*/*
 // @match       https://*/*
-// @require     https://cdn.jsdelivr.net/gh/lzghzr/TampermonkeyJS@4cc2a90f51182ada0aab944ee708a893ed4ee31f/libReplaceText/libReplaceText.js
+// @require     https://github.com/lzghzr/TampermonkeyJS/raw/75a1a97c8b010f78f986fa2c56646e910af419e2/libReplaceText/libReplaceText.js#sha256-zjITNEjaUMqzPJSSjGkZp6J7uHKibg4dBo6BbnJjG/k=
 // @license     MIT
 // @grant       none
 // @run-at      document-start
