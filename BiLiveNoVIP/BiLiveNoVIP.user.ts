@@ -11,7 +11,7 @@
 // @license             MIT
 // @compatible          chrome 基础功能需要 88 以上支持 :not() 伪类，高级功能需要 105 及以上支持 :has() 伪类
 // @compatible          edge 基础功能需要 88 以上支持 :not() 伪类，高级功能需要 105 及以上支持 :has() 伪类
-// @compatible          firefox 基础功能需要 84 以上支持 :not() 伪类，高级功能需要 :has() 伪类，暂不支持
+// @compatible          firefox 基础功能需要 84 以上支持 :not() 伪类，高级功能需要 121 及以上支持 :has() 伪类
 // @grant               GM_addStyle
 // @grant               GM_getValue
 // @grant               GM_setValue
@@ -800,6 +800,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
     }
   })
   // 拦截函数
+  let push = 0x0
   W.webpackChunklive_room = W.webpackChunklive_room || []
   W.webpackChunklive_room.push = new Proxy(W.webpackChunklive_room.push, {
     apply: function (target, _this, args) {
@@ -819,6 +820,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
           else {
             console.error(GM_info.script.name, '插入脚本 icon 失效', fnStr)
           }
+          push = push | 0x1
         }
         // 增强聊天显示
         if (fnStr.includes('return this.chatList.children.length')) {
@@ -830,6 +832,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
           else {
             console.error(GM_info.script.name, '增强聊天显示失效', fnStr)
           }
+          push = push | 0x2
         }
         // 屏蔽大航海榜单背景图, 太丑了, 啥时候B站更新再取消
         if (fnStr.includes('/xlive/app-room/v2/guardTab/topList')) {
@@ -841,6 +844,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
           else {
             console.error(GM_info.script.name, '屏蔽大航海背景图失效', fnStr)
           }
+          push = push | 0x4
         }
         // 屏蔽视频轮播
         if (config.menu.noRoundPlay.enable) {
@@ -855,6 +859,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
             else {
               console.error(GM_info.script.name, '屏蔽视频轮播失效', fnStr)
             }
+            push = push | 0x8
           }
           // 下播
           if (fnStr.includes('case"PREPARING":')) {
@@ -866,7 +871,11 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
             else {
               console.error(GM_info.script.name, '屏蔽下播轮播失效', fnStr)
             }
+            push = push | 0x10
           }
+        }
+        else {
+          push = push | (0x8 + 0x10)
         }
         // 屏蔽挂机检测
         if (config.menu.noSleep.enable) {
@@ -880,6 +889,10 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
               console.error(GM_info.script.name, '屏蔽挂机检测失效', fnStr)
             }
           }
+          push = push | 0x20
+        }
+        else {
+          push = push | 0x20
         }
         // 隐身入场
         if (config.menu.invisible.enable) {
@@ -893,6 +906,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
             else {
               console.error(GM_info.script.name, '进入房间隐身失效', fnStr)
             }
+            push = push | 0x40
           }
           // 房间心跳
           if (fnStr.includes('this.enterRoomTracker=new ')) {
@@ -904,15 +918,24 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
             else {
               console.error(GM_info.script.name, '房间心跳隐身失效', fnStr)
             }
+            push = push | 0x80
           }
+        }
+        else {
+          push = push | (0x40 + 0x80)
         }
         if (fn.toString() !== fnStr) {
           args[0][1][name] = str2Fn(fnStr)
+        }
+        if (isAllBitsSet(push)) {
+          W.webpackChunklive_room.push = target
+          break
         }
       }
       return Reflect.apply(target, _this, args)
     }
   })
+  let add = 0x0
   Set.prototype.add = new Proxy(Set.prototype.add, {
     apply: function (target, _this, args) {
       if (args[0] && args[0] instanceof Function) {
@@ -929,10 +952,16 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
             else {
               console.error(GM_info.script.name, '屏蔽下播轮播失效', fnStr)
             }
+            add = add | 0x1
           }
+        } else {
+          add = add | 0x1
         }
         if (args[0].toString() !== fnStr) {
           args[0] = str2Fn(fnStr)
+        }
+        if (isAllBitsSet(add)) {
+          Set.prototype.add = target
         }
       }
       return Reflect.apply(target, _this, args)
@@ -951,6 +980,16 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"1
       const args = head.replaceAll(/function[^\(]*|[\s()=>]/g, '').split(',')
       return new Function(...args, body)
     }
+  }
+  /**
+   * isAllBitsSet
+   *
+   * @param {number} value
+   * @return {boolean}
+   */
+  function isAllBitsSet(value: number): boolean {
+    if (value === 0) { return false }
+    return (value & (value + 1)) === 0
   }
   // 屏蔽活动皮肤
   if (config.menu.noActivityPlat.enable) {
