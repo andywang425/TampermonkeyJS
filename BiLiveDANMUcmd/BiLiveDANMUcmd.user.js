@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name        bilibili直播弹幕修复
 // @namespace   https://github.com/lzghzr/TampermonkeyJS
-// @version     0.0.1
+// @version     0.0.2
 // @author      lzghzr
 // @description 修复bilibili直播弹幕
 // @supportURL  https://github.com/lzghzr/TampermonkeyJS/issues
 // @include     /^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/
-// @require     https://fastly.jsdelivr.net/gh/lzghzr/TampermonkeyJS@e4c2e5a14b55a5a0a3fab43f206496cb30c9b6e6/bliveproxy/bliveproxy.js
+// @require     https://github.com/lzghzr/TampermonkeyJS/raw/a81315bc497aeeb7b5e7b9acd5aeaf41a13ef2e3/bliveproxy/bliveproxy_inline.js#sha256-voXUaa+mxDJt0KsqyZ4sGt8vS/TJndo9UZRYnh3C1h0=
 // @license     MIT
 // @run-at      document-start
 // ==/UserScript==
