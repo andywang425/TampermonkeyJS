@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.30
+// @version             4.2.32
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -230,6 +230,8 @@ class NoVIP {
 .chat-history-list.with-brush-prompt {
   height: 100% !important;
 }
+/* 目前只看到冲榜提示 */
+.chat-history-panel #all-guide-cards,
 /* 聊天下方滚动消息，进场、点赞之类的 */
 #brush-prompt,
 /* 初始系统提示 */
@@ -388,6 +390,12 @@ class NoVIP {
 .rank-list-section.new .gift-rank-cntr .top3-cntr,
 .rank-list-section.new .guard-rank-cntr {
   height: unset !important;
+}
+.rank-list-section.new .gift-rank-cntr .top3-cntr {
+  padding-top: 5px !important;
+}
+.rank-list-section.new .guard-rank-cntr .top3-cntr {
+  top: 15px !important;
 }
 /* 调整聊天区 */
 .rank-list-section~.chat-history-panel {
@@ -761,7 +769,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
             fnStr = fnStr.replace(regexp, '$<left>$<svg>\[\
 $<mut_n>("circle",{attrs:{cx:"12",cy:"12",r:"10",stroke:$<mut_t>.blockEffectIconColor,"stroke-width":"1.5",fill:"none"}}),\
 $<mut_t>._v(" "),\
-$<mut_n>("text",{attrs:{"font-family":"Noto Sans SC","font-size":"14",x:"5",y:"17",fill:$<mut_t>.blockEffectIconColor}},[$<mut_t>._v("滚")])\
+$<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",y:"17",fill:$<mut_t>.blockEffectIconColor}},[$<mut_t>._v("滚")])\
 ]');
           }
           else {
