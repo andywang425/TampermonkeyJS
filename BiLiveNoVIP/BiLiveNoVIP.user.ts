@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.33
+// @version             4.2.34
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -783,7 +783,7 @@ if (userConfig.version === undefined || userConfig.version < defaultConfig.versi
       defaultConfig.menu[x].enable = userConfig.menu[x].enable
     }
     catch (error) {
-      console.error(GM_info.script.name, error)
+      console.error(...errorName('载入配置失效'), error)
     }
   }
   config = defaultConfig
@@ -830,9 +830,9 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
 ]')
           }
           else {
-            console.error(GM_info.script.name, '插入脚本 icon 失效', fnStr)
+            console.error(...errorName('插入脚本 icon 失效'), fnStr)
           }
-          push = push | 0x1
+          push |= 1 << 0
         }
         // 增强聊天显示
         if (fnStr.includes('return this.chatList.children.length')) {
@@ -842,9 +842,9 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
             fnStr = fnStr.replace(regexp, '$<left>this.chatList.querySelectorAll(".danmaku-item:not(.NoVIP_hide)").length')
           }
           else {
-            console.error(GM_info.script.name, '增强聊天显示失效', fnStr)
+            console.error(...errorName('增强聊天显示失效'), fnStr)
           }
-          push = push | 0x2
+          push |= 1 << 1
         }
         // 屏蔽大航海榜单背景图, 太丑了, 啥时候B站更新再取消
         if (fnStr.includes('/xlive/app-room/v2/guardTab/topList')) {
@@ -854,9 +854,9 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
             fnStr = fnStr.replace(regexp, '$<left>$<mut>.data.info.anchor_guard_achieve_level=0;$<right>')
           }
           else {
-            console.error(GM_info.script.name, '屏蔽大航海背景图失效', fnStr)
+            console.error(...errorName('屏蔽大航海背景图失效'), fnStr)
           }
-          push = push | 0x4
+          push |= 1 << 2
         }
         // 屏蔽视频轮播
         if (config.menu.noRoundPlay.enable) {
@@ -869,9 +869,9 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
                 .replace(regexp, '$<left>if($<mut>.sent.serverResponse.data.live_status===2)$<mut>.sent.serverResponse.data.live_status=0;$<right>')
             }
             else {
-              console.error(GM_info.script.name, '屏蔽视频轮播失效', fnStr)
+              console.error(...errorName('屏蔽视频轮播失效'), fnStr)
             }
-            push = push | 0x8
+            push |= 1 << 3
           }
           // 下播
           if (fnStr.includes('case"PREPARING":')) {
@@ -881,13 +881,13 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
               fnStr = fnStr.replace(regexp, '$<left>$<mut>.round=0;$<right>')
             }
             else {
-              console.error(GM_info.script.name, '屏蔽下播轮播失效', fnStr)
+              console.error(...errorName('屏蔽下播轮播失效'), fnStr)
             }
-            push = push | 0x10
+            push |= 1 << 4
           }
         }
         else {
-          push = push | (0x8 + 0x10)
+          push |= (1 << 3 | 1 << 4)
         }
         // 屏蔽挂机检测
         if (config.menu.noSleep.enable) {
@@ -898,13 +898,13 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
               fnStr = fnStr.replace(regexp, '$<left>return;')
             }
             else {
-              console.error(GM_info.script.name, '屏蔽挂机检测失效', fnStr)
+              console.error(...errorName('屏蔽挂机检测失效'), fnStr)
             }
-            push = push | 0x20
+            push |= 1 << 5
           }
         }
         else {
-          push = push | 0x20
+          push |= 1 << 5
         }
         // 隐身入场
         if (config.menu.invisible.enable) {
@@ -916,9 +916,9 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
               fnStr = fnStr.replace(regexp, '$<left>1$<right>')
             }
             else {
-              console.error(GM_info.script.name, '进入房间隐身失效', fnStr)
+              console.error(...errorName('进入房间隐身失效'), fnStr)
             }
-            push = push | 0x40
+            push |= 1 << 6
           }
           // 房间心跳
           if (fnStr.includes('this.enterRoomTracker=new ')) {
@@ -928,13 +928,13 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
               fnStr = fnStr.replace(regexp, '$<left>,this.enterRoomTracker.report=()=>{},')
             }
             else {
-              console.error(GM_info.script.name, '房间心跳隐身失效', fnStr)
+              console.error(...errorName('房间心跳隐身失效'), fnStr)
             }
-            push = push | 0x80
+            push |= 1 << 7
           }
         }
         else {
-          push = push | (0x40 + 0x80)
+          push |= (1 << 6 | 1 << 7)
         }
         if (fn.toString() !== fnStr) {
           args[0][1][name] = str2Fn(fnStr)
@@ -962,12 +962,12 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
               fnStr = fnStr.replace(regexp, '$<left>$<mut>.round=0;$<right>')
             }
             else {
-              console.error(GM_info.script.name, '屏蔽下播轮播失效', fnStr)
+              console.error(...errorName('屏蔽下播轮播失效'), fnStr)
             }
-            add = add | 0x1
+            add |= 1 << 0
           }
         } else {
-          add = add | 0x1
+          add |= 1 << 0
         }
         if (args[0].toString() !== fnStr) {
           args[0] = str2Fn(fnStr)
@@ -979,30 +979,6 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
       return Reflect.apply(target, _this, args)
     }
   })
-  /**
-   * str2Fn
-   *
-   * @param {string} str
-   * @returns {(Function | void)}
-   */
-  function str2Fn(str: string): Function | void {
-    const fnReg = str.match(/([^\{]*)\{(.*)\}$/s)
-    if (fnReg !== null) {
-      const [, head, body] = fnReg
-      const args = head.replaceAll(/function[^\(]*|[\s()=>]/g, '').split(',')
-      return new Function(...args, body)
-    }
-  }
-  /**
-   * isAllBitsSet
-   *
-   * @param {number} value
-   * @return {boolean}
-   */
-  function isAllBitsSet(value: number): boolean {
-    if (value === 0) { return false }
-    return (value & (value + 1)) === 0
-  }
   // 屏蔽活动皮肤
   if (config.menu.noActivityPlat.enable) {
     if (self === top) {
@@ -1065,4 +1041,42 @@ else if (location.href.includes('bilibili.com/blackboard/')) {
       }
     })
   }
+}
+
+/**
+ * str2Fn
+ *
+ * @param {string} str
+ * @returns {(Function | void)}
+ */
+function str2Fn(str: string): Function | void {
+  const fnReg = str.match(/([^\{]*)\{(.*)\}$/s)
+  if (fnReg !== null) {
+    const [, head, body] = fnReg
+    const args = head.replaceAll(/function[^\(]*|[\s()=>]/g, '').split(',')
+    return new Function(...args, body)
+  }
+}
+/**
+ * isAllBitsSet
+ *
+ * @param {number} value
+ * @return {boolean}
+ */
+function isAllBitsSet(value: number): boolean {
+  if (value === 0) { return false }
+  return (value & (value + 1)) === 0
+}
+/**
+ * errorName
+ *
+ * @param {string} name
+ * @return {string[]}
+ */
+function errorName(name: string): string[] {
+  return [
+    `%c${GM_info.script.name}%c ${name}`,
+    "font-weight: bold; color: white; background-color: #FF6699; padding: 1px 4px; border-radius: 4px;",
+    "font-weight: bold; color: #FF6699;"
+  ]
 }
