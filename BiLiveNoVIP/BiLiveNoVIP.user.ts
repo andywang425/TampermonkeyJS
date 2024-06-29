@@ -815,7 +815,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
     }
   })
   // 拦截函数
-  let push = 0x0
+  let push = 1 << 8
   W.webpackChunklive_room = W.webpackChunklive_room || []
   W.webpackChunklive_room.push = new Proxy(W.webpackChunklive_room.push, {
     apply: function (target, _this, args) {
@@ -958,7 +958,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
       return Reflect.apply(target, _this, args)
     }
   })
-  let add = 0x0
+  let add = 1 << 1
   Set.prototype.add = new Proxy(Set.prototype.add, {
     apply: function (target, _this, args) {
       if (args[0] && args[0] instanceof Function) {
