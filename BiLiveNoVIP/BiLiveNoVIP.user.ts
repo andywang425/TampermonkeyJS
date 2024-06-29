@@ -783,7 +783,7 @@ if (userConfig.version === undefined || userConfig.version < defaultConfig.versi
       defaultConfig.menu[x].enable = userConfig.menu[x].enable
     }
     catch (error) {
-      console.error(...errorName('载入配置失效'), error)
+      console.error(...scriptName('载入配置失效'), error)
     }
   }
   config = defaultConfig
@@ -828,9 +828,10 @@ $<mut_n>("circle",{attrs:{cx:"12",cy:"12",r:"10",stroke:$<mut_t>.blockEffectIcon
 $<mut_t>._v(" "),\
 $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",y:"17",fill:$<mut_t>.blockEffectIconColor}},[$<mut_t>._v("滚")])\
 ]')
+            console.info(...scriptName('脚本 icon 已加载'))
           }
           else {
-            console.error(...errorName('插入脚本 icon 失效'), fnStr)
+            console.error(...scriptName('插入脚本 icon 失效'), fnStr)
           }
           push |= 1 << 0
         }
@@ -840,9 +841,10 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
           const match = fnStr.match(regexp)
           if (match !== null) {
             fnStr = fnStr.replace(regexp, '$<left>this.chatList.querySelectorAll(".danmaku-item:not(.NoVIP_hide)").length')
+            console.info(...scriptName('增强聊天显示已加载'))
           }
           else {
-            console.error(...errorName('增强聊天显示失效'), fnStr)
+            console.error(...scriptName('增强聊天显示失效'), fnStr)
           }
           push |= 1 << 1
         }
@@ -852,9 +854,10 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
           const match = fnStr.match(regexp)
           if (match !== null) {
             fnStr = fnStr.replace(regexp, '$<left>$<mut>.data.info.anchor_guard_achieve_level=0;$<right>')
+            console.info(...scriptName('屏蔽大航海背景图已加载'))
           }
           else {
-            console.error(...errorName('屏蔽大航海背景图失效'), fnStr)
+            console.error(...scriptName('屏蔽大航海背景图失效'), fnStr)
           }
           push |= 1 << 2
         }
@@ -867,9 +870,10 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
             if (match !== null) {
               fnStr = fnStr.replace('roomInitRes', '__NEPTUNE_IS_MY_WAIFU__')
                 .replace(regexp, '$<left>if($<mut>.sent.serverResponse.data.live_status===2)$<mut>.sent.serverResponse.data.live_status=0;$<right>')
+              console.info(...scriptName('屏蔽视频轮播已加载'))
             }
             else {
-              console.error(...errorName('屏蔽视频轮播失效'), fnStr)
+              console.error(...scriptName('屏蔽视频轮播失效'), fnStr)
             }
             push |= 1 << 3
           }
@@ -879,9 +883,10 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
             const match = fnStr.match(regexp)
             if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>$<mut>.round=0;$<right>')
+              console.info(...scriptName('屏蔽下播轮播已加载'))
             }
             else {
-              console.error(...errorName('屏蔽下播轮播失效'), fnStr)
+              console.error(...scriptName('屏蔽下播轮播失效'), fnStr)
             }
             push |= 1 << 4
           }
@@ -896,9 +901,10 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
             const match = fnStr.match(regexp)
             if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>return;')
+              console.info(...scriptName('屏蔽挂机检测已加载'))
             }
             else {
-              console.error(...errorName('屏蔽挂机检测失效'), fnStr)
+              console.error(...scriptName('屏蔽挂机检测失效'), fnStr)
             }
             push |= 1 << 5
           }
@@ -914,9 +920,10 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
             const match = fnStr.match(regexp)
             if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>1$<right>')
+              console.info(...scriptName('进入房间隐身已加载'))
             }
             else {
-              console.error(...errorName('进入房间隐身失效'), fnStr)
+              console.error(...scriptName('进入房间隐身失效'), fnStr)
             }
             push |= 1 << 6
           }
@@ -926,9 +933,10 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
             const match = fnStr.match(regexp)
             if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>,this.enterRoomTracker.report=()=>{},')
+              console.info(...scriptName('房间心跳隐身已加载'))
             }
             else {
-              console.error(...errorName('房间心跳隐身失效'), fnStr)
+              console.error(...scriptName('房间心跳隐身失效'), fnStr)
             }
             push |= 1 << 7
           }
@@ -960,9 +968,10 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
             const match = fnStr.match(regexp)
             if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>$<mut>.round=0;$<right>')
+              console.info(...scriptName('屏蔽下播轮播已加载'))
             }
             else {
-              console.error(...errorName('屏蔽下播轮播失效'), fnStr)
+              console.error(...scriptName('屏蔽下播轮播失效'), fnStr)
             }
             add |= 1 << 0
           }
@@ -1068,12 +1077,12 @@ function isAllBitsSet(value: number): boolean {
   return (value & (value + 1)) === 0
 }
 /**
- * errorName
+ * scriptName
  *
  * @param {string} name
  * @return {string[]}
  */
-function errorName(name: string): string[] {
+function scriptName(name: string): string[] {
   return [
     `%c${GM_info.script.name}%c ${name}`,
     "font-weight: bold; color: white; background-color: #FF6699; padding: 1px 4px; border-radius: 4px;",
