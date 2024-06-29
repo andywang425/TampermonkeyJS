@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.35
+// @version             4.2.36
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -923,6 +923,19 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
         }
         if (isAllBitsSet(add)) {
           Set.prototype.add = target;
+        }
+      }
+      return Reflect.apply(target, _this, args);
+    }
+  });
+  W.fetch = new Proxy(W.fetch, {
+    apply: async function (target, _this, args) {
+      if (config.menu.noRoundPlay.enable) {
+        if (typeof args[0] === 'string' && args[0].includes('/xlive/web-room/v2/index/getRoomPlayInfo')) {
+          console.info(...scriptName('屏蔽视频轮播已加载'));
+          const response = await Reflect.apply(target, _this, args);
+          const body = await response.text();
+          return new Response(body.replace('"live_status":2', '"live_status":0'));
         }
       }
       return Reflect.apply(target, _this, args);
