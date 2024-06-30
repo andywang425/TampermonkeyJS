@@ -992,6 +992,21 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
       return Reflect.apply(target, _this, args)
     }
   })
+  // 拦截 fetch
+  W.fetch = new Proxy(W.fetch, {
+    apply: async function (target, _this, args: [RequestInfo, RequestInit | undefined]) {
+      // 屏蔽视频轮播
+      if (config.menu.noRoundPlay.enable) {
+        if (typeof args[0] === 'string' && args[0].includes('/xlive/web-room/v2/index/getRoomPlayInfo')) {
+          console.info(...scriptName('屏蔽视频轮播已加载'))
+          const response: Response = await Reflect.apply(target, _this, args)
+          const body = await response.text()
+          return new Response(body.replace('"live_status":2', '"live_status":0'))
+        }
+      }
+      return Reflect.apply(target, _this, args)
+    }
+  })
   // 屏蔽活动皮肤
   if (config.menu.noActivityPlat.enable) {
     if (self === top) {
