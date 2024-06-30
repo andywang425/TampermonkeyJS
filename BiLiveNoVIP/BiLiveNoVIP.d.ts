@@ -1,6 +1,29 @@
-export class ajaxProxy {
-  static proxyAjax: (proxyMap: ProxyMap) => XMLHttpRequest
-  static unProxyAjax: () => void
+interface xhookRequest {
+  method: string
+  url: string
+  body: string
+  headers: {
+    [index: string]: string
+  }
+  timeout: number
+  type: string
+  withCredentials: string
+}
+interface xhookResponse {
+  status: number
+  statusText: string
+  text: string
+  headers: {
+    [index: string]: string
+  }
+  xml: Document
+  data: any
+}
+export class xhook {
+  static before: (handler: (request: xhookRequest, callback: Function) => void) => void
+  static after: (handler: (request: xhookRequest, response: xhookResponse, callback: Function) => void) => void
+  static enable: () => void
+  static disable: () => void
 }
 declare global {
   interface Window {
