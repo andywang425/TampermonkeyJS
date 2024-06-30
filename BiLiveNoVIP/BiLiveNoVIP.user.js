@@ -758,7 +758,16 @@ if (userConfig.version === undefined || userConfig.version < defaultConfig.versi
 else {
   config = userConfig;
 }
-if (document.head.innerHTML.includes('addWaifu')) {
+if (!document.documentElement.hasAttribute('lab-style')) {
+  if (config.menu.noActivityPlat.enable) {
+    W.addEventListener("message", msg => {
+      if (msg.origin === 'https://live.bilibili.com' && msg.data.startsWith('https://live.bilibili.com/blanc/')) {
+        location.href = msg.data;
+      }
+    });
+  }
+}
+else {
   W.getComputedStyle = new Proxy(W.getComputedStyle, {
     apply: function (target, _this, args) {
       if (args !== undefined && args[0] instanceof HTMLElement) {
@@ -964,15 +973,6 @@ if (document.head.innerHTML.includes('addWaifu')) {
       new NoVIP().Start();
     }
   });
-}
-else {
-  if (config.menu.noActivityPlat.enable) {
-    W.addEventListener("message", msg => {
-      if (msg.origin === 'https://live.bilibili.com' && msg.data.startsWith('https://live.bilibili.com/blanc/')) {
-        location.href = msg.data;
-      }
-    });
-  }
 }
 function str2Fn(str) {
   const fnReg = str.match(/([^\{]*)\{(.*)\}$/s);

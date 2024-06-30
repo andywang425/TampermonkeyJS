@@ -108,12 +108,14 @@ class NoVIP {
               if (blockEffectCtnr !== null) {
                 this.AddUI(blockEffectCtnr)
               }
-            } else if (addedNode.classList.contains('control-panel-ctnr')) {
+            }
+            else if (addedNode.classList.contains('control-panel-ctnr')) {
               const blockEffectBtnSvg = addedNode.querySelector<SVGElement>('.block-effect-btn svg')
               if (blockEffectBtnSvg !== null) {
                 blockEffectBtnSvg.innerHTML = '<circle data-v-75ca97ff="" cx="12" cy="12" r="10" stroke="#C9CCD0" stroke-width="1.5" fill="none"></circle> <text data-v-75ca97ff="" font-family="Noto Sans CJK SC" font-size="14" x="5" y="17" fill="#C9CCD0">滚</text>'
                 console.info(...scriptName('脚本 icon 已加载'))
-              } else {
+              }
+              else {
                 console.error(...scriptName('插入脚本 icon 失效'))
               }
             }
@@ -806,7 +808,17 @@ else {
   config = userConfig
 }
 
-if (document.head.innerHTML.includes('addWaifu')) {
+if (!document.documentElement.hasAttribute('lab-style')) {
+  // 屏蔽活动皮肤
+  if (config.menu.noActivityPlat.enable) {
+    W.addEventListener("message", msg => {
+      if (msg.origin === 'https://live.bilibili.com' && (<string>msg.data).startsWith('https://live.bilibili.com/blanc/')) {
+        location.href = msg.data
+      }
+    })
+  }
+}
+else {
   // 拦截反屏蔽
   W.getComputedStyle = new Proxy(W.getComputedStyle, {
     apply: function (target, _this, args) {
@@ -934,7 +946,8 @@ if (document.head.innerHTML.includes('addWaifu')) {
             }
             add |= 1 << 0
           }
-        } else {
+        }
+        else {
           add |= 1 << 0
         }
         if (args[0].toString() !== fnStr) {
@@ -1030,15 +1043,6 @@ if (document.head.innerHTML.includes('addWaifu')) {
       new NoVIP().Start()
     }
   })
-} else {
-  // 屏蔽活动皮肤
-  if (config.menu.noActivityPlat.enable) {
-    W.addEventListener("message", msg => {
-      if (msg.origin === 'https://live.bilibili.com' && (<string>msg.data).startsWith('https://live.bilibili.com/blanc/')) {
-        location.href = msg.data
-      }
-    })
-  }
 }
 
 /**
