@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.37
+// @version             4.2.38
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -9,6 +9,7 @@
 // @match               https://live.bilibili.com/*
 // @match               https://www.bilibili.com/blackboard/*
 // @license             MIT
+// @require             https://github.com/lzghzr/TampermonkeyJS/raw/fcb1c5db40d32f877d49c0ed2e41d57bd17ad96f/ajax-proxy/ajax-proxy.js#sha256=gdnIAuKAoGbiVdPUVGp6xctZaZJlOwsdQ0o4LawIKzk=
 // @compatible          chrome 基础功能需要 88 以上支持 :not() 伪类，高级功能需要 105 及以上支持 :has() 伪类
 // @compatible          edge 基础功能需要 88 以上支持 :not() 伪类，高级功能需要 105 及以上支持 :has() 伪类
 // @compatible          firefox 基础功能需要 84 以上支持 :not() 伪类，高级功能需要 121 及以上支持 :has() 伪类
@@ -19,7 +20,7 @@
 // @run-at              document-start
 // ==/UserScript==
 import { GM_addStyle, GM_getValue, GM_setValue } from '../@types/tm_f'
-import { config } from './BiLiveNoVIP'
+import { config, ajaxProxy } from './BiLiveNoVIP'
 
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 
@@ -990,6 +991,27 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
         }
       }
       return Reflect.apply(target, _this, args)
+    }
+  })
+  // 拦截 xhr
+  ajaxProxy.proxyAjax({
+    open: function (args, _xhr) {
+      // 隐身入场
+      if (config.menu.invisible.enable && args[1].includes('/web-room/v1/index/getInfoByUser')) {
+        console.info(...scriptName('隐身入场已加载'))
+        args[1] = args[1].replace('not_mock_enter_effect=0', 'not_mock_enter_effect=1')
+      }
+      return args
+    },
+    responseText: {
+      getter: function (value, xhr) {
+        // 屏蔽视频轮播
+        if (config.menu.noRoundPlay.enable && xhr.responseURL.includes('/xlive/web-room/v2/index/getRoomPlayInfo')) {
+          console.info(...scriptName('屏蔽视频轮播已加载'))
+          value = value.replace('"live_status":2', '"live_status":0')
+        }
+        return value
+      }
     }
   })
   // 拦截 fetch
