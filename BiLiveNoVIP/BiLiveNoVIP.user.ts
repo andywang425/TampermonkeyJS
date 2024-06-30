@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.39
+// @version             4.2.40
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -806,7 +806,7 @@ else {
   config = userConfig
 }
 
-if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
+if (document.head.innerHTML.includes('addWaifu')) {
   // 拦截反屏蔽
   W.getComputedStyle = new Proxy(W.getComputedStyle, {
     apply: function (target, _this, args) {
@@ -840,7 +840,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
           const match = fnStr.match(regexp)
           if (match !== null) {
             fnStr = fnStr.replace(regexp, '$<left>this.chatList.querySelectorAll(".danmaku-item:not(.NoVIP_hide)").length')
-            console.info(...scriptName('增强聊天显示已加载'))
+            console.info(...scriptName('增强聊天显示 已加载'))
           }
           else {
             console.error(...scriptName('增强聊天显示失效'), fnStr)
@@ -855,7 +855,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
             const match = fnStr.match(regexp)
             if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>$<mut>.round=0;$<right>')
-              console.info(...scriptName('屏蔽下播轮播已加载'))
+              console.info(...scriptName('屏蔽下播轮播 已加载'))
             }
             else {
               console.error(...scriptName('屏蔽下播轮播失效'), fnStr)
@@ -873,7 +873,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
             const match = fnStr.match(regexp)
             if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>return;')
-              console.info(...scriptName('屏蔽挂机检测已加载'))
+              console.info(...scriptName('屏蔽挂机检测 已加载'))
             }
             else {
               console.error(...scriptName('屏蔽挂机检测失效'), fnStr)
@@ -892,7 +892,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
             const match = fnStr.match(regexp)
             if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>,this.enterRoomTracker.report=()=>{},')
-              console.info(...scriptName('房间心跳隐身已加载'))
+              console.info(...scriptName('房间心跳隐身 已加载'))
             }
             else {
               console.error(...scriptName('房间心跳隐身失效'), fnStr)
@@ -927,7 +927,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
             const match = fnStr.match(regexp)
             if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>$<mut>.round=0;$<right>')
-              console.info(...scriptName('屏蔽下播轮播已加载'))
+              console.info(...scriptName('屏蔽下播轮播 已加载'))
             }
             else {
               console.error(...scriptName('屏蔽下播轮播失效'), fnStr)
@@ -953,14 +953,14 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
     if (config.menu.invisible.enable) {
       if (request.url.includes('/web-room/v1/index/getInfoByUser')) {
         request.url = request.url.replace('not_mock_enter_effect=0', 'not_mock_enter_effect=1')
-        console.info(...scriptName('隐身入场已拦截'))
+        console.info(...scriptName('隐身入场 已拦截'))
       }
     }
     // 屏蔽视频轮播
     if (config.menu.noRoundPlay.enable) {
       if (request.url.includes('/live/getRoundPlayVideo')) {
         request.url = request.url.replace(/room_id=\d+/, 'room_id=');
-        console.info(...scriptName('屏蔽视频轮播已拦截'));
+        console.info(...scriptName('屏蔽视频轮播 已拦截'));
       }
     }
   })
@@ -968,13 +968,13 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
     // 屏蔽大航海榜单背景图, 太丑了, 啥时候B站更新再取消
     if (request.url.includes('/xlive/app-room/v2/guardTab/topList')) {
       response.text = response.text.replace(/"anchor_guard_achieve_level":\d+/, '"anchor_guard_achieve_level":0')
-      console.info(...scriptName('屏蔽大航海榜单背景图已拦截'))
+      console.info(...scriptName('屏蔽大航海榜单背景图 已拦截'))
     }
     // 屏蔽视频轮播
     if (config.menu.noRoundPlay.enable) {
       if (request.url.includes('/xlive/web-room/v2/index/getRoomPlayInfo')) {
         response.text = response.text.replace('"live_status":2', '"live_status":0')
-        console.info(...scriptName('屏蔽视频轮播已拦截'))
+        console.info(...scriptName('屏蔽视频轮播 已拦截'))
       }
     }
   })
@@ -1030,8 +1030,7 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/)) {
       new NoVIP().Start()
     }
   })
-}
-else if (location.href.includes('bilibili.com/blackboard/')) {
+} else {
   // 屏蔽活动皮肤
   if (config.menu.noActivityPlat.enable) {
     W.addEventListener("message", msg => {
