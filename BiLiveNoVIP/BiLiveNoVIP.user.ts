@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.40
+// @version             4.2.41
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -107,16 +107,6 @@ class NoVIP {
               const blockEffectCtnr = addedNode.querySelector<HTMLDivElement>('.block-effect-ctnr')
               if (blockEffectCtnr !== null) {
                 this.AddUI(blockEffectCtnr)
-              }
-            }
-            else if (addedNode.classList.contains('control-panel-ctnr')) {
-              const blockEffectBtnSvg = addedNode.querySelector<SVGElement>('.block-effect-btn svg')
-              if (blockEffectBtnSvg !== null) {
-                blockEffectBtnSvg.innerHTML = '<circle data-v-75ca97ff="" cx="12" cy="12" r="10" stroke="#C9CCD0" stroke-width="1.5" fill="none"></circle> <text data-v-75ca97ff="" font-family="Noto Sans CJK SC" font-size="14" x="5" y="17" fill="#C9CCD0">滚</text>'
-                console.info(...scriptName('脚本 icon 已加载'))
-              }
-              else {
-                console.error(...scriptName('插入脚本 icon 失效'))
               }
             }
           }
@@ -840,12 +830,29 @@ else {
   // 屏蔽 __NEPTUNE_IS_MY_WAIFU__
   Object.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', {})
   // 拦截函数
-  let push = 1 << 4
+  let push = 1 << 5
   W.webpackChunklive_room = W.webpackChunklive_room || []
   W.webpackChunklive_room.push = new Proxy(W.webpackChunklive_room.push, {
     apply: function (target, _this, args) {
       for (const [name, fn] of Object.entries<Function>(args[0][1])) {
         let fnStr = fn.toString()
+        // 脚本 icon
+        if (fnStr.includes('staticClass:"block-effect-icon-root"')) {
+          const regexp = /(?<left>staticClass:"block-effect-icon-root"\},\[)"on"===(?<mut_t>\w+)\.blockEffectStatus\?(?<svg>(?<mut_n>\w+)\("svg".*?)\[\k<mut_n>\("path".*?blockEffectIconColor\}\}\)\]/s
+          const match = fnStr.match(regexp)
+          if (match !== null) {
+            fnStr = fnStr.replace(regexp, '$<left>$<svg>\[\
+$<mut_n>("circle",{attrs:{cx:"12",cy:"12",r:"10",stroke:$<mut_t>.blockEffectIconColor,"stroke-width":"1.5",fill:"none"}}),\
+$<mut_t>._v(" "),\
+$<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",y:"17",fill:$<mut_t>.blockEffectIconColor}},[$<mut_t>._v("滚")])\
+]')
+            console.info(...scriptName('脚本 icon 已加载'))
+          }
+          else {
+            console.error(...scriptName('插入脚本 icon 失效'), fnStr)
+          }
+          push |= 1 << 0
+        }
         // 增强聊天显示
         if (fnStr.includes('return this.chatList.children.length')) {
           const regexp = /(?<left>return )this\.chatList\.children\.length/s
@@ -857,7 +864,7 @@ else {
           else {
             console.error(...scriptName('增强聊天显示失效'), fnStr)
           }
-          push |= 1 << 0
+          push |= 1 << 1
         }
         // 屏蔽视频轮播
         if (config.menu.noRoundPlay.enable) {
@@ -872,11 +879,11 @@ else {
             else {
               console.error(...scriptName('屏蔽下播轮播失效'), fnStr)
             }
-            push |= 1 << 1
+            push |= 1 << 2
           }
         }
         else {
-          push |= 1 << 1
+          push |= 1 << 2
         }
         // 屏蔽挂机检测
         if (config.menu.noSleep.enable) {
@@ -890,11 +897,11 @@ else {
             else {
               console.error(...scriptName('屏蔽挂机检测失效'), fnStr)
             }
-            push |= 1 << 2
+            push |= 1 << 3
           }
         }
         else {
-          push |= 1 << 2
+          push |= 1 << 3
         }
         // 隐身入场
         if (config.menu.invisible.enable) {
@@ -909,11 +916,11 @@ else {
             else {
               console.error(...scriptName('房间心跳隐身失效'), fnStr)
             }
-            push |= 1 << 3
+            push |= 1 << 4
           }
         }
         else {
-          push |= 1 << 3
+          push |= 1 << 4
         }
         if (fn.toString() !== fnStr) {
           args[0][1][name] = str2Fn(fnStr)
