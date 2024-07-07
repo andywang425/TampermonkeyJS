@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.42
+// @version             4.2.43
 // @author              lzghzr
 // @description         屏蔽聊天室礼物以及关键字, 净化聊天室环境
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -9,7 +9,7 @@
 // @match               https://live.bilibili.com/*
 // @match               https://www.bilibili.com/blackboard/*
 // @license             MIT
-// @require             https://github.com/lzghzr/TampermonkeyJS/raw/5036ad2ff5875d313df654b8feca13cdb69d0d00/xhook/xhook.js#sha256=7l4G7dFdCp6GZibUe8Z3vl6jb6Q1yCjUrfUxI8k2KFY=
+// @require             https://github.com/lzghzr/TampermonkeyJS/raw/fcb1c5db40d32f877d49c0ed2e41d57bd17ad96f/ajax-proxy/ajax-proxy.js#sha256=gdnIAuKAoGbiVdPUVGp6xctZaZJlOwsdQ0o4LawIKzk=
 // @compatible          chrome 基础功能需要 88 以上支持 :not() 伪类，高级功能需要 105 及以上支持 :has() 伪类
 // @compatible          edge 基础功能需要 88 以上支持 :not() 伪类，高级功能需要 105 及以上支持 :has() 伪类
 // @compatible          firefox 基础功能需要 84 以上支持 :not() 伪类，高级功能需要 121 及以上支持 :has() 伪类
@@ -20,7 +20,7 @@
 // @run-at              document-start
 // ==/UserScript==
 import { GM_addStyle, GM_getValue, GM_setValue } from '../@types/tm_f'
-import { config, xhook } from './BiLiveNoVIP'
+import { config, ajaxProxy } from './BiLiveNoVIP'
 
 const W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
 
@@ -958,34 +958,96 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
     }
   })
   // 拦截 xhr
-  xhook.before((request) => {
-    // 隐身入场
-    if (config.menu.invisible.enable) {
-      if (request.url.includes('/web-room/v1/index/getInfoByUser')) {
-        request.url = request.url.replace('not_mock_enter_effect=0', 'not_mock_enter_effect=1')
-        console.info(...scriptName('隐身入场 已拦截'))
+  ajaxProxy.proxyAjax({
+    open: function (args, _xhr) {
+      // 隐身入场
+      if (config.menu.invisible.enable) {
+        if (args[1].includes('/web-room/v1/index/getInfoByUser')) {
+          args[1] = args[1].replace('not_mock_enter_effect=0', 'not_mock_enter_effect=1')
+          console.info(...scriptName('隐身入场 已拦截'))
+        }
       }
-    }
-    // 屏蔽视频轮播
-    if (config.menu.noRoundPlay.enable) {
-      if (request.url.includes('/live/getRoundPlayVideo')) {
-        request.url = request.url.replace(/room_id=\d+/, 'room_id=');
-        console.info(...scriptName('屏蔽视频轮播 已拦截'));
+      return args
+    },
+    responseText: {
+      getter: function (value, xhr) {
+        // 屏蔽房间皮肤
+        if (config.menu.noRoomSkin.enable) {
+          if (xhr.responseURL.includes('/xlive/app-room/v2/guardTab/topList')) {
+            value = value.replace(/"anchor_guard_achieve_level":\d+/, '"anchor_guard_achieve_level":0')
+            console.info(...scriptName('屏蔽大航海榜单背景图 已拦截'))
+          }
+        }
+        // 屏蔽视频轮播
+        if (config.menu.noRoundPlay.enable) {
+          if (xhr.responseURL.includes('/xlive/web-room/v2/index/getRoomPlayInfo')) {
+            value = value.replace('"live_status":2', '"live_status":0')
+            console.info(...scriptName('屏蔽视频轮播 已拦截'))
+          }
+        }
+        return value
+      }
+    },
+    status: {
+      getter: function (value, xhr) {
+        // 屏蔽视频轮播
+        if (config.menu.noRoundPlay.enable) {
+          if (xhr.responseURL.includes('/live/getRoundPlayVideo')) {
+            value = 403
+            console.info(...scriptName('屏蔽视频轮播 已拦截'))
+          }
+        }
+        return value
       }
     }
   })
-  xhook.after((request, response) => {
-    // 屏蔽大航海榜单背景图, 太丑了, 啥时候B站更新再取消
-    if (request.url.includes('/xlive/app-room/v2/guardTab/topList')) {
-      response.text = response.text.replace(/"anchor_guard_achieve_level":\d+/, '"anchor_guard_achieve_level":0')
-      console.info(...scriptName('屏蔽大航海榜单背景图 已拦截'))
-    }
-    // 屏蔽视频轮播
-    if (config.menu.noRoundPlay.enable) {
-      if (request.url.includes('/xlive/web-room/v2/index/getRoomPlayInfo')) {
-        response.text = response.text.replace('"live_status":2', '"live_status":0')
-        console.info(...scriptName('屏蔽视频轮播 已拦截'))
+  // 拦截fetch
+  W.fetch = new Proxy(W.fetch, {
+    apply: async function (target, _this, args: [RequestInfo, RequestInit | undefined]) {
+      // 屏蔽房间皮肤
+      if (config.menu.noRoomSkin.enable) {
+        if (typeof args[0] === 'string' && args[0].includes('/xlive/app-room/v2/guardTab/topList')) {
+          const response: Response = await Reflect.apply(target, _this, args)
+          const body = await response.json()
+          body.data.info.anchor_guard_achieve_level = 0
+          const newResponse: Response = new Response(JSON.stringify(body))
+          console.info(...scriptName('屏蔽大航海榜单背景图 已拦截'))
+          return newResponse
+        }
       }
+      // 屏蔽视频轮播
+      if (config.menu.noRoundPlay.enable) {
+        if (typeof args[0] === 'string' && args[0].includes('/live/getRoundPlayVideo')) {
+          // 为了兼容其他脚本
+          const response: Response = await Reflect.apply(target, _this, args)
+          const newResponse: Response = new Response(response.body, {
+            status: 403,
+            statusText: 'Forbidden',
+            headers: response.headers
+          })
+          console.info(...scriptName('屏蔽视频轮播 已拦截'))
+          return newResponse
+        }
+        if (typeof args[0] === 'string' && args[0].includes('/xlive/web-room/v2/index/getRoomPlayInfo')) {
+          const response: Response = await Reflect.apply(target, _this, args)
+          const body = await response.text()
+          const newResponse: Response = new Response(body.replace('"live_status":2', '"live_status":0'))
+          console.info(...scriptName('屏蔽视频轮播 已拦截'))
+          return newResponse
+        }
+      }
+      // 隐身入场
+      if (config.menu.invisible.enable) {
+        if (typeof args[0] === 'string' && args[0].includes('/xlive/web-room/v1/index/getInfoByUser')) {
+          args[0] = args[0].replace(/room_id=\d+/, 'room_id=273022')
+          const response: Response = await Reflect.apply(target, _this, args)
+          const body = await response.text()
+          const newResponse: Response = new Response(body.replace('"is_room_admin":false', '"is_room_admin":true'))
+          console.info(...scriptName('隐身入场 已拦截'))
+          return newResponse
+        }
+      }
+      return Reflect.apply(target, _this, args)
     }
   })
   // 屏蔽活动皮肤
