@@ -2,6 +2,19 @@ export class ajaxProxy {
   static proxyAjax: (proxyMap: ProxyMap) => XMLHttpRequest
   static unProxyAjax: () => void
 }
+export class ah {
+  static proxy: ({ onRequest, onError, onResponse }: {
+    onRequest?: (config: XHROptions, handler: { next: (config: XHROptions) => void }) => void,
+    onError?: (err: Error, handler: { next: (err: Error) => void }) => void,
+    onResponse?: (response: { config: XHROptions, headers: Headers, response: string, status: number, statusText: string }, handler: { next: ({ config, response }: { config: XHROptions, response: string }) => void }) => void
+  }, window?: Window) => XMLHttpRequest
+  static unProxy: (window?: Window) => void
+  static hook: ({ open }: {
+    open?: (args: [string, string, boolean], xhr: XMLHttpRequest) => boolean,
+    send?: (args: [string], xhr: XMLHttpRequest) => boolean,
+  }, window?: Window) => void
+  static unHook: (window?: Window) => void
+}
 declare global {
   interface Window {
     webpackChunklive_room: unknown[]
