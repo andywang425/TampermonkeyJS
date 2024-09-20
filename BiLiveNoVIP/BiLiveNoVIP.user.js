@@ -210,6 +210,8 @@ class NoVIP {
 /* 礼物栏 */
 .gift-control-panel > *:not(.left-part-ctnr),
 #web-player__bottom-bar__container,
+/* 礼物按钮 */
+#web-player-controller-wrap-el .web-live-player-gift-icon-wrap,
 /* 主播心愿 */
 .gift-wish-card-root,
 
@@ -450,8 +452,6 @@ class NoVIP {
 #head-info-vm .activity-entry,
 /* 粉丝团  */
 #head-info-vm .follow-ctnr,
-/* 礼物按钮 */
-#web-player-controller-wrap-el .web-live-player-gift-icon-wrap,
 /* 头像框 */
 .blive-avatar-pendant,
 /* 主播城市 */
