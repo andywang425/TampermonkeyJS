@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.47
+// @version             4.2.48
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -64,7 +64,7 @@ class NoVIP {
       mutations.forEach(mutation => {
         mutation.addedNodes.forEach(addedNode => {
           const danmakuNode = addedNode instanceof Text ? <HTMLDivElement>addedNode.parentElement : <HTMLDivElement>addedNode
-          if (danmakuNode?.classList?.contains('bili-dm')) {
+          if (danmakuNode?.classList?.contains('bili-danmaku-x-dm')) {
             const danmakuText = danmakuNode.innerText.split(/ ?[x×]\d+$/)
             const dateNow = Date.now()
             if (danmakuMessage.has(danmakuText[0]) && dateNow - <number>danmakuMessage.get(danmakuText[0]) < 10_000) {
@@ -200,7 +200,7 @@ class NoVIP {
 /* 欢迎提示条 */
 #welcome-area-bottom-vm:has(.wealth-medal),
 /* 弹幕 */
-.bili-dm > .bili-icon,
+.bili-danmaku-x-dm > .bili-icon,
 /* 聊天 */
 .chat-item .wealth-medal-ctnr {
   display: none !important;
@@ -362,7 +362,7 @@ class NoVIP {
     }
     if (config.menu.noEmotDanmaku.enable) {
       cssText += `
-.bili-dm > img:not(.bili-icon) {
+.bili-danmaku-x-dm > img:not(.bili-icon) {
   display: none !important;
 }`
     }
@@ -546,7 +546,7 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
     }
     if (config.menu.noDanmakuColor.enable) {
       cssText += `
-.bili-dm {
+.bili-danmaku-x-dm {
   color: #ffffff !important;
 }`
     }
@@ -593,7 +593,7 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
   display: none !important;
 }
 /* 自定义 */
-.bili-dm.NoVIP_danmaku_hide,
+.bili-danmaku-x-dm.NoVIP_danmaku_hide,
 /* 官方 */
 .danmaku-item-container .mode-adv {
   color: transparent !important;
