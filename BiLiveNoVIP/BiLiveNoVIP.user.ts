@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.49
+// @version             4.2.50
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -64,18 +64,24 @@ class NoVIP {
       mutations.forEach(mutation => {
         mutation.addedNodes.forEach(addedNode => {
           const danmakuNode = addedNode instanceof Text ? <HTMLDivElement>addedNode.parentElement : <HTMLDivElement>addedNode
-          if (danmakuNode?.classList?.contains('bili-danmaku-x-dm')) {
-            const danmakuText = danmakuNode.innerText.split(/ ?[x×]\d+$/)
-            const dateNow = Date.now()
-            if (danmakuMessage.has(danmakuText[0]) && dateNow - <number>danmakuMessage.get(danmakuText[0]) < 10_000) {
-              danmakuNode.classList.add('NoVIP_danmaku_hide')
-            }
-            else if (danmakuText[1] !== undefined) {
-              danmakuNode.classList.add('NoVIP_danmaku_hide')
-            }
-            else {
-              danmakuMessage.set(danmakuText[0], dateNow)
-            }
+          if (danmakuNode?.classList?.contains('danmaku-item-container')) {
+            this.danmakuObserver.disconnect()
+            this.danmakuObserver.observe(danmakuNode, { childList: true })
+          }
+          else if (danmakuNode?.classList?.contains('bili-danmaku-x-dm')) {
+            danmakuNode.addEventListener('animationstart', () => {
+              const danmakuText = danmakuNode.innerText.split(/ ?[x×]\d+$/)
+              const dateNow = Date.now()
+              if (danmakuMessage.has(danmakuText[0]) && dateNow - <number>danmakuMessage.get(danmakuText[0]) < 10_000) {
+                danmakuNode.classList.add('NoVIP_danmaku_hide')
+              }
+              else if (danmakuText[1] !== undefined) {
+                danmakuNode.classList.add('NoVIP_danmaku_hide')
+              }
+              else {
+                danmakuMessage.set(danmakuText[0], dateNow)
+              }
+            })
           }
         })
       })
