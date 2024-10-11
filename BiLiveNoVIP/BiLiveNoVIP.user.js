@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.50
+// @version             4.2.51
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -777,7 +777,7 @@ const defaultConfig = {
       enable: false
     },
     invisible: {
-      name: '隐身入场',
+      name: '进场隐身观看',
       enable: false
     }
   }
@@ -891,10 +891,10 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
             const match = fnStr.match(regexp);
             if (match !== null) {
               fnStr = fnStr.replace(regexp, '$<left>,this.enterRoomTracker.report=()=>{},');
-              console.info(...scriptName('房间心跳隐身 已加载'));
+              console.info(...scriptName('隐藏榜单信息 已加载'));
             }
             else {
-              console.error(...scriptName('房间心跳隐身失效'), fnStr);
+              console.error(...scriptName('隐藏榜单信息失效'), fnStr);
             }
             push |= 1 << 4;
           }
@@ -913,44 +913,12 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
       return Reflect.apply(target, _this, args);
     }
   });
-  let add = 1 << 1;
-  Set.prototype.add = new Proxy(Set.prototype.add, {
-    apply: function (target, _this, args) {
-      if (args[0] && args[0] instanceof Function) {
-        let fnStr = args[0].toString();
-        if (config.menu.noRoundPlay.enable) {
-          if (fnStr.includes('.Preparing:')) {
-            const regexp = /(?<left>Preparing:)(?<right>.*?1===(?<mut>\w+)\.round)/s;
-            const match = fnStr.match(regexp);
-            if (match !== null) {
-              fnStr = fnStr.replace(regexp, '$<left>$<mut>.round=0;$<right>');
-              console.info(...scriptName('屏蔽下播轮播 已加载'));
-            }
-            else {
-              console.error(...scriptName('屏蔽下播轮播失效'), fnStr);
-            }
-            add |= 1 << 0;
-          }
-        }
-        else {
-          add |= 1 << 0;
-        }
-        if (args[0].toString() !== fnStr) {
-          args[0] = str2Fn(fnStr);
-        }
-        if (isAllBitsSet(add)) {
-          Set.prototype.add = target;
-        }
-      }
-      return Reflect.apply(target, _this, args);
-    }
-  });
   ah.proxy({
     onRequest: (XHRconfig, handler) => {
       if (config.menu.invisible.enable) {
         if (XHRconfig.url.includes('/xlive/web-room/v1/index/getInfoByUser')) {
           XHRconfig.url = XHRconfig.url.replace('not_mock_enter_effect=0', 'not_mock_enter_effect=1');
-          console.info(...scriptName('隐身入场 已拦截'));
+          console.info(...scriptName('隐藏进场信息 已拦截'));
         }
       }
       handler.next(XHRconfig);
@@ -1009,7 +977,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
       if (config.menu.invisible.enable) {
         if (typeof args[0] === 'string' && args[0].includes('/xlive/web-room/v1/index/getInfoByUser')) {
           args[0] = args[0].replace('not_mock_enter_effect=0', 'not_mock_enter_effect=1');
-          console.info(...scriptName('隐身入场 已拦截'));
+          console.info(...scriptName('隐藏进场信息 已拦截'));
         }
       }
       return Reflect.apply(target, _this, args);
