@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.52
+// @version             4.2.53
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -170,7 +170,7 @@ class NoVIP {
 /* 聊天背景 */
 .chat-item.chat-colorful-bubble div:has(div[style*="border-image-source"]),
 /* 欢迎提示条 */
-#welcome-area-bottom-vm:has(.sama-avatar-box),
+#welcome-area-bottom-vm,
 /* 粉丝勋章内标识 */
 .chat-item .fans-medal-item-ctnr .medal-guard,
 /* 舰队指挥官标识 */
@@ -182,8 +182,7 @@ class NoVIP {
 }
 /* 兼容chrome 105以下版本 */
 @supports not selector(:has(a, b)) {
-  .chat-item.chat-colorful-bubble div[style*="border-image-source"]
-  #welcome-area-bottom-vm {
+  .chat-item.chat-colorful-bubble div[style*="border-image-source"] {
     display: none !important;
   }
 }`
@@ -204,18 +203,12 @@ class NoVIP {
   margin: unset !important;
 }
 /* 欢迎提示条 */
-#welcome-area-bottom-vm:has(.wealth-medal),
+#welcome-area-bottom-vm,
 /* 弹幕 */
 .bili-danmaku-x-dm > .bili-icon,
 /* 聊天 */
 .chat-item .wealth-medal-ctnr {
   display: none !important;
-}
-/* 兼容chrome 105以下版本 */
-@supports not selector(:has(a, b)) {
-  #welcome-area-bottom-vm {
-    display: none !important;
-  }
 }`
     }
     if (config.menu.noGiftMsg.enable) {
