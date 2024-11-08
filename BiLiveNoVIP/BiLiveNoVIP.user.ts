@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.53
+// @version             4.2.54
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -647,13 +647,6 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
       spanClone.classList.remove('checkbox-selected')
       spanClone.classList.add('checkbox-default')
     }
-    const replaceItem = (listNodes: NodeListOf<HTMLLIElement>, x: string): HTMLLIElement | void => {
-      for (const child of listNodes) {
-        if (child.innerText === config.menu[x].replace) {
-          return child
-        }
-      }
-    }
 
     const itemHTML = <HTMLLIElement>(<HTMLLIElement>elmUList.firstElementChild).cloneNode(true)
     const itemInput = <HTMLInputElement>itemHTML.querySelector('input')
@@ -662,34 +655,30 @@ body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"]
     itemLabel.htmlFor = itemLabel.htmlFor.replace(/\d/, '')
 
     // 替换原有设置
-    // 循环插入内容
-    let i = listLength + 10
     const listNodes = <NodeListOf<HTMLLIElement>>elmUList.childNodes
-    for (const x in config.menu) {
-      const child = replaceItem(listNodes, x)
-      if (child === undefined) {
-        const itemHTMLClone = <HTMLLIElement>itemHTML.cloneNode(true)
-        const itemInputClone = <HTMLInputElement>itemHTMLClone.querySelector('input')
-        const itemLabelClone = <HTMLLabelElement>itemHTMLClone.querySelector('label')
-        itemInputClone.id += i
-        itemLabelClone.htmlFor += i
-        i++
-        itemLabelClone.innerText = config.menu[x].name
-
-        changeListener(itemHTMLClone, x)
-
-        elmUList.appendChild(itemHTMLClone)
-      }
-      else {
-        const itemHTMLClone = <HTMLLIElement>child.cloneNode(true)
-        const itemLabelClone = <HTMLLabelElement>itemHTMLClone.querySelector('label')
-        itemLabelClone.innerText = config.menu[x].name
-
-        changeListener(itemHTMLClone, x)
-        child.remove()
-        elmUList.appendChild(itemHTMLClone)
+    const replaceChild: HTMLLIElement[] = []
+    for (const child of listNodes) {
+      if (replaceMenu.has(child.innerText)) {
+        replaceChild.push(child)
       }
     }
+    replaceChild.forEach(child => child.remove())
+    // 循环插入内容
+    let i = listLength + 10
+    const itemFragment = document.createDocumentFragment()
+    for (const x in config.menu) {
+      const itemHTMLClone = <HTMLLIElement>itemHTML.cloneNode(true)
+      const itemInputClone = <HTMLInputElement>itemHTMLClone.querySelector('input')
+      const itemLabelClone = <HTMLLabelElement>itemHTMLClone.querySelector('label')
+      itemInputClone.id += i
+      itemLabelClone.htmlFor += i
+      i++
+      itemLabelClone.innerText = config.menu[x].name
+
+      changeListener(itemHTMLClone, x)
+      itemFragment.appendChild(itemHTMLClone)
+    }
+    elmUList.appendChild(itemFragment)
   }
   /**
    * 添加菜单所需css
@@ -839,6 +828,10 @@ if (userConfig.version === undefined || userConfig.version < defaultConfig.versi
 }
 else {
   config = userConfig
+}
+const replaceMenu = new Set<string | undefined>()
+for (const x in config.menu) {
+  replaceMenu.add(config.menu[x].replace)
 }
 
 if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/) && document.documentElement.hasAttribute('lab-style')) {
