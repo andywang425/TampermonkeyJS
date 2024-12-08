@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.2.55
+// @version             4.2.56
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -499,13 +499,14 @@ class NoVIP {
     }
     if (config.menu.noRaffle.enable) {
       cssText += `
-body:not(.player-full-win):has(#anchor-guest-box-id)[style*="overflow: hidden;"] {
+body:not(.player-full-win):has(.m-nobar__popup-container)[style*="overflow: hidden;"] {
   overflow-y: overlay !important;
 }
 #shop-popover-vm,
 #anchor-guest-box-id,
 #player-effect-vm,
 #chat-draw-area-vm,
+.m-nobar__popup-container,
 /* 天选之类的 */
 .gift-control-panel .left-part-ctnr,
 .anchor-lottery-entry,
