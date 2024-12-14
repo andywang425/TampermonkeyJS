@@ -39,41 +39,8 @@ interface configMenuData {
   replace?: string
   enable: boolean
 }
-// 弹幕格式
-interface danmuObject {
-  text: string
-  info: [
-    any[],
-    string,
-    [
-      number,
-      string,
-      number
-    ]
-  ]
-  cmd: string
-  color: number
-}
-// 特殊礼物消息
-interface SPECIAL_GIFT {
-  cmd: string
-  data: SPECIAL_GIFT_Data
-  roomid: number
-}
-interface SPECIAL_GIFT_Data {
-  '39': SPECIAL_GIFT_Data_BeatStorm
-}
-interface SPECIAL_GIFT_Data_BeatStorm {
-  id: string
-  num: number
-  time: number
-  content: string
-  hadJoin: number
-  action: string
-}
-interface playerType {
-  type: string
-}
+// 用户信息
+type userInfo = [string, { uid: number, name: string }][]
 // 监听聊天窗口
 // let chatObserver = new MutationObserver((res) => {
 //   for (let y of res) {
