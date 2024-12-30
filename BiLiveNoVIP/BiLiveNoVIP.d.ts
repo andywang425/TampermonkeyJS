@@ -40,7 +40,11 @@ interface configMenuData {
   enable: boolean
 }
 // 用户信息
-type userInfo = [string, { uid: number, name: string }][]
+interface userInfo {
+  crc32: string
+  uid: number
+  name: string
+}
 // 监听聊天窗口
 // let chatObserver = new MutationObserver((res) => {
 //   for (let y of res) {
@@ -81,4 +85,4 @@ type userInfo = [string, { uid: number, name: string }][]
 //     document.close()
 //   }
 // }
-export { config }
+export { config, userInfo }
