@@ -5,7 +5,7 @@
     /* 基本选项 */
     "incremental": true,                            /* 启用增量编译 */
     "target": "ESNext",                             /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', 'ES2018', 'ES2019', 'ES2020', 'ES2021', or 'ESNEXT'. */
-    // "module": "ESNext",                          /* 指定模块代码生成: "none"、"commonjs"、"amd"、"system"、"umd"、"es2015"、"es2020" 或 "ESNext"。 */
+    "module": "ESNext",                             /* 指定模块代码生成: "none"、"commonjs"、"amd"、"system"、"umd"、"es2015"、"es2020" 或 "ESNext"。 */
     "lib": [
       "DOM",
       "DOM.Iterable",
@@ -52,7 +52,7 @@
     // "noPropertyAccessFromIndexSignature": true,  /* Require undeclared properties from index signatures to use element accesses. */
 
     /* 模块分辨率选项 */
-    // "moduleResolution": "node",                  /* 指定模块解析策略: "node" (Node.js)或 "classic" (TypeScript pre-1.6)。 */
+    "moduleResolution": "node10",                   /* 指定模块解析策略: "node" (Node.js)或 "classic" (TypeScript pre-1.6)。 */
     // "baseUrl": "./",                             /* 用于解析非绝对模块名的基目录。 */
     // "paths": {},                                 /* 一系列条目，这些条目将重新映射导入内容，以查找与 "baseUrl" 有关的位置。 */
     // "rootDirs": [],                              /* 根文件夹列表，其组合内容表示在运行时的项目结构。 */

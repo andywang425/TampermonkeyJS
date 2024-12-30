@@ -8,9 +8,9 @@
 // @license     MIT
 // @run-at      document-start
 // ==/UserScript==
-import { InitOutput } from 'libWasmHash.d'
+import { InitOutput } from './libWasmHash.d'
 /**
- * 
+ *
  * MIT license
  * https://github.com/rustwasm/wasm-pack-template
  *
