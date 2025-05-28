@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.3.1
+// @version             4.3.2
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -326,7 +326,8 @@ class NoVIP {
       }
     })
     // 屏蔽 __NEPTUNE_IS_MY_WAIFU__
-    Object.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', {})
+    Object.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', { value: {} })
+    // Object.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', {})
 
     this.replaceFunction()
   }
@@ -1395,7 +1396,7 @@ body:not(.player-full-win):has(iframe[src*="live-lottery"])[style*="overflow: hi
     ['weekly_rank', 'current_week_rank'], ['weekly_rank', 'last_week_rank'],
     ['monthly_rank', 'current_month_rank'], ['monthly_rank', 'last_month_rank']]
     for (const type of types) {
-      await Tools.sleep(1000)
+      await Tools.sleep(5000)
       const queryContributionRank = await fetch(this.queryRank(room_id, ruid, type[0], type[1]))
       const rank = await queryContributionRank.json()
       const item = <{ uid: number, name: string }[]>rank?.data?.item
