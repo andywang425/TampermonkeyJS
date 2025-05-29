@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.3.3
+// @version             4.3.4
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -108,18 +108,6 @@ class Tools {
     }
   }
   /**
-   * isAllBitsSet
-   *
-   * @static
-   * @param {number} value
-   * @return {*}  {boolean}
-   * @memberof Tools
-   */
-  public static isAllBitsSet(value: number): boolean {
-    if (value === 0) { return false }
-    return (value & (value + 1)) === 0
-  }
-  /**
    * scriptName
    *
    * @static
@@ -166,13 +154,22 @@ class Tools {
   public static md5(str: string): string {
     return CryptoJS.MD5(str).toString(CryptoJS.enc.Hex)
   }
+  /**
+   * querySign
+   *
+   * @static
+   * @param {string} url
+   * @return {*}  {string}
+   * @memberof Tools
+   */
   public static querySign(url: string): string {
     let search = url.split('?')[1]
       .replace(/&w_rid=\w+/, '')
       .replace(/&wts=\d+/, '')
-    const wts = Date.now()
-    const salt = 'ea1db124af3c7062474693fa704f4ff8'
-    const wrid = Tools.md5(`${search}&wts=${wts}${salt}`)
+    const searchSorted = search.split('&').sort().join('&')
+    const wts = Math.round(Date.now() / 1000)
+    const salt = W.__wbi_salt || 'ea1db124af3c7062474693fa704f4ff8'
+    const wrid = Tools.md5(`${searchSorted}&wts=${wts}${salt}`)
     return `${url.split('?')[0]}?${search}&w_rid=${wrid}&wts=${wts}`
   }
 }
@@ -336,9 +333,54 @@ class NoVIP {
     })
     // 屏蔽 __NEPTUNE_IS_MY_WAIFU__
     Object.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', { value: {} })
-    // Object.defineProperty(W, '__NEPTUNE_IS_MY_WAIFU__', {})
 
-    this.replaceFunction()
+    const waitWebpack = setInterval(() => {
+      if (W.webpackChunklive_room !== undefined) {
+        clearInterval(waitWebpack)
+        this.replaceFunction()
+      }
+    }, 0);
+
+    const waitRoomBuff = setInterval(() => {
+      if (W.roomBuffService !== undefined) {
+        clearInterval(waitRoomBuff)
+        this.replaceRoomBuff()
+      }
+    }, 0);
+  }
+  /**
+   * 缓存房间皮肤数据
+   *
+   * @memberof NoVIP
+   */
+  private replaceRoomBuff() {
+    // 屏蔽房间皮肤
+    W.roomBuffService.mount = new Proxy(W.roomBuffService.mount, {
+      apply: function (target, _this, args) {
+        if (args[0] !== undefined) {
+          _this.__NORoomSkin_skin = args[0]
+          if (args[0].id !== 0) {
+            _this.__NORoomSkin_skin_id = args[0].id
+          }
+          if (_this.__NORoomSkin) {
+            args[0].id = 0
+            args[0] = {}
+          }
+          else if (args[0].id === 0 && args[0].start_time !== 0) {
+            args[0].id = _this.__NORoomSkin_skin_id || 0
+          }
+        }
+        return Reflect.apply(target, _this, args)
+      }
+    })
+    W.roomBuffService.unmount = new Proxy(W.roomBuffService.unmount, {
+      apply: function (target, _this, args) {
+        if (_this.__NORoomSkin_skin !== undefined) {
+          _this.__NORoomSkin_skin.id = 0
+        }
+        return Reflect.apply(target, _this, args)
+      }
+    })
   }
   /**
    * 替换函数
@@ -347,8 +389,6 @@ class NoVIP {
    */
   private replaceFunction() {
     const that = this
-    let push = 1 << 5
-    W.webpackChunklive_room = W.webpackChunklive_room || []
     W.webpackChunklive_room.push = new Proxy(W.webpackChunklive_room.push, {
       apply: function (target, _this, args) {
         for (const [name, fn] of Object.entries<Function>(args[0][1])) {
@@ -368,7 +408,6 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
             else {
               console.error(...Tools.scriptName('插入脚本 icon 失效'), fnStr)
             }
-            push |= 1 << 0
           }
           // 增强聊天显示
           if (fnStr.includes('return this.chatList.children.length')) {
@@ -381,7 +420,6 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
             else {
               console.error(...Tools.scriptName('增强聊天显示失效'), fnStr)
             }
-            push |= 1 << 1
           }
           // 屏蔽视频轮播
           if (that.config.menu.noRoundPlay.enable) {
@@ -396,11 +434,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
               else {
                 console.error(...Tools.scriptName('屏蔽下播轮播失效'), fnStr)
               }
-              push |= 1 << 2
             }
-          }
-          else {
-            push |= 1 << 2
           }
           // 屏蔽挂机检测
           if (that.config.menu.noSleep.enable) {
@@ -414,11 +448,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
               else {
                 console.error(...Tools.scriptName('屏蔽挂机检测失效'), fnStr)
               }
-              push |= 1 << 3
             }
-          }
-          else {
-            push |= 1 << 3
           }
           // 在线榜单隐身
           if (that.config.menu.rankInvisible.enable) {
@@ -433,18 +463,22 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
               else {
                 console.error(...Tools.scriptName('在线榜单隐身失效'), fnStr)
               }
-              push |= 1 << 4
             }
           }
-          else {
-            push |= 1 << 4
+          // wbi_key
+          if (fnStr.includes('join("&");return{w_rid:')) {
+            const regexp = /(?<right>return{w_rid:.*?\+(?<mut>\w+)\))/s
+            const match = fnStr.match(regexp)
+            if (match !== null) {
+              fnStr = fnStr.replace(regexp, 'self.__wbi_salt=$<mut>;$<right>')
+              console.info(...Tools.scriptName('wbi_key 已加载'))
+            }
+            else {
+              console.error(...Tools.scriptName('wbi_key失效'), fnStr)
+            }
           }
           if (fn.toString() !== fnStr) {
             args[0][1][name] = Tools.str2Fn(fnStr)
-          }
-          if (Tools.isAllBitsSet(push)) {
-            W.webpackChunklive_room.push = target
-            break
           }
         }
         return Reflect.apply(target, _this, args)
@@ -1470,38 +1504,6 @@ if (location.href.match(/^https:\/\/live\.bilibili\.com\/(?:blanc\/)?\d/) && doc
   }
   noVIP.init()
   document.addEventListener('readystatechange', () => {
-    if (document.readyState === 'interactive') {
-      // 屏蔽房间皮肤
-      if (W.roomBuffService.mount !== undefined) {
-        W.roomBuffService.mount = new Proxy(W.roomBuffService.mount, {
-          apply: function (target, _this, args) {
-            if (args[0] !== undefined) {
-              _this.__NORoomSkin_skin = args[0]
-              if (args[0].id !== 0) {
-                _this.__NORoomSkin_skin_id = args[0].id
-              }
-              if (_this.__NORoomSkin) {
-                args[0].id = 0
-                args[0] = {}
-              }
-              else if (args[0].id === 0 && args[0].start_time !== 0) {
-                args[0].id = _this.__NORoomSkin_skin_id || 0
-              }
-            }
-            return Reflect.apply(target, _this, args)
-          }
-        })
-        W.roomBuffService.unmount = new Proxy(W.roomBuffService.unmount, {
-          apply: function (target, _this, args) {
-            if (_this.__NORoomSkin_skin !== undefined) {
-              _this.__NORoomSkin_skin.id = 0
-            }
-            return Reflect.apply(target, _this, args)
-          }
-        })
-      }
-    }
-    // 加載菜单
     if (document.readyState === 'complete') {
       noVIP.start()
     }

@@ -24,6 +24,7 @@ declare global {
       __NORoomSkin_skin: {},
       __NORoomSkin: boolean,
     }
+    __wbi_salt: string
   }
 }
 // 设置信息
