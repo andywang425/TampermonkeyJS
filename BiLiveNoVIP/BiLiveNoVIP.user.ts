@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.3.2
+// @version             4.3.3
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -165,6 +165,15 @@ class Tools {
    */
   public static md5(str: string): string {
     return CryptoJS.MD5(str).toString(CryptoJS.enc.Hex)
+  }
+  public static querySign(url: string): string {
+    let search = url.split('?')[1]
+      .replace(/&w_rid=\w+/, '')
+      .replace(/&wts=\d+/, '')
+    const wts = Date.now()
+    const salt = 'ea1db124af3c7062474693fa704f4ff8'
+    const wrid = Tools.md5(`${search}&wts=${wts}${salt}`)
+    return `${url.split('?')[0]}?${search}&w_rid=${wrid}&wts=${wts}`
   }
 }
 class NoVIP {
@@ -524,7 +533,8 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
           // 进场隐身观看
           if (this.config.menu.invisible.enable) {
             if (XHRconfig.url.includes('/xlive/web-room/v1/index/getInfoByUser')) {
-              XHRconfig.url = XHRconfig.url.replace('not_mock_enter_effect=0', 'not_mock_enter_effect=1')
+              let query = XHRconfig.url.replace(/room_id=\d+/, 'room_id=273022')
+              XHRconfig.url = Tools.querySign(query)
               console.info(...Tools.scriptName('隐藏进场信息 已拦截'))
             }
           }
@@ -555,6 +565,13 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
                 console.info(...Tools.scriptName('在线榜单隐身 已添加'))
               }
               XHRresponse.response = JSON.stringify(body)
+            }
+          }
+          // 进场隐身观看
+          if (this.config.menu.invisible.enable) {
+            if (XHRresponse.config.url.includes('/xlive/web-room/v1/index/getInfoByUser')) {
+              XHRresponse.response = XHRresponse.response.replace('"is_room_admin":false', '"is_room_admin":true')
+              console.info(...Tools.scriptName('隐藏进场信息 已拦截'))
             }
           }
           // 屏蔽视频轮播
@@ -600,9 +617,14 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
         // 进场隐身观看
         if (that.config.menu.invisible.enable) {
           if (url.includes('/xlive/web-room/v1/index/getInfoByUser')) {
-            url = url.replace('not_mock_enter_effect=0', 'not_mock_enter_effect=1')
+            let query = url.replace(/room_id=\d+/, 'room_id=273022')
+            url = Tools.querySign(query)
             args[0] = (resource instanceof Request) ? new Request(url, resource) : url
+            const response: Response = await Reflect.apply(target, _this, args)
+            const body = await response.text()
+            const newResponse: Response = new Response(body.replace('"is_room_admin":false', '"is_room_admin":true'))
             console.info(...Tools.scriptName('隐藏进场信息 已拦截'))
+            return newResponse
           }
         }
         // 屏蔽房间皮肤
@@ -1404,11 +1426,9 @@ body:not(.player-full-win):has(iframe[src*="live-lottery"])[style*="overflow: hi
     }
   }
   private queryRank(room_id: number, ruid: number, type: string, switch_: string): string {
-    const wts = Date.now()
-    const salt = 'ea1db124af3c7062474693fa704f4ff8'
-    const wrid = Tools.md5(`page=1&page_size=100&platform=web&room_id=${room_id}&ruid=${ruid}&switch=${switch_}&type=${type}&web_location=444.8&wts=${wts}${salt}`)
-    return `//api.live.bilibili.com/xlive/general-interface/v1/rank/queryContributionRank?\
-ruid=${ruid}&room_id=${room_id}&page=1&page_size=100&type=${type}&switch=${switch_}&platform=web&web_location=444.8&w_rid=${wrid}&wts=${wts}`
+    const url = `//api.live.bilibili.com/xlive/general-interface/v1/rank/queryContributionRank?\
+ruid=${ruid}&room_id=${room_id}&page=1&page_size=100&type=${type}&switch=${switch_}&platform=web&web_location=444.8`
+    return Tools.querySign(url)
   }
   /**
    * 添加用户到数据库
