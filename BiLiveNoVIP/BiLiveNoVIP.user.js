@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.3.4
+// @version             4.3.5
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -89,9 +89,9 @@ class Tools {
   }
   static scriptName(name) {
     return [
-      `%c${GM_info.script.name}%c ${name}`,
-      "font-weight: bold; color: white; background-color: #FF6699; padding: 1px 4px; border-radius: 4px;",
-      "font-weight: bold; color: #FF6699;"
+      `%c ${GM_info.script.name} %c ${name} `,
+      "padding: 2px 6px; border-radius: 3px 0 0 3px; color: #ffffff; background: #FF6699; font-weight: bold;",
+      "padding: 2px 6px; border-radius: 0 3px 3px 0; color: #ffffff; background: #FF9999; font-weight: bold;"
     ];
   }
   static sleep(ms) {
@@ -596,16 +596,23 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
       mutations.forEach(mutation => {
         mutation.addedNodes.forEach(addedNode => {
           if (addedNode instanceof HTMLDivElement && addedNode.classList.contains('danmaku-item')) {
+            const nameNode = addedNode.querySelector('.danmaku-item-left');
             const chatNode = addedNode.querySelector('.danmaku-item-right');
             if (chatNode !== null) {
-              const chatText = chatNode.innerText;
-              const dateNow = Date.now();
-              if (chatMessage.has(chatText) && dateNow - chatMessage.get(chatText) < 10_000) {
-                addedNode.classList.add('NoVIP_chat_hide');
+              if (nameNode !== null && nameNode.querySelector('.user-name') === null) {
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'user-name v-middle pointer open-menu';
+                nameSpan.innerText = addedNode.dataset['uname'] + " : " || '跨房用户';
+                nameNode.appendChild(nameSpan);
               }
-              else {
-                chatMessage.set(chatText, dateNow);
-              }
+            }
+            const chatText = chatNode.innerText;
+            const dateNow = Date.now();
+            if (chatMessage.has(chatText) && dateNow - chatMessage.get(chatText) < 10_000) {
+              addedNode.classList.add('NoVIP_chat_hide');
+            }
+            else {
+              chatMessage.set(chatText, dateNow);
             }
           }
         });
@@ -799,6 +806,8 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
 .chat-history-list.with-brush-prompt {
   height: 100% !important;
 }
+/* 跨房 */
+.uni-live-prefix-tag,
 /* 目前只看到冲榜提示 */
 .chat-history-panel #all-guide-cards,
 /* 聊天下方滚动消息，进场、点赞之类的 */
