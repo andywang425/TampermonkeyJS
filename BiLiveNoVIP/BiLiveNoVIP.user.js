@@ -404,7 +404,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
                 }
                 else if (that.userInfoDB !== undefined) {
                   args[0] = [];
-                  that.userInfoDB.getData(command.info[0][7]).then(userInfo => {
+                  that.userInfoDB.getData(command.info[0][7].replace(/^0+/, '')).then(userInfo => {
                     if (userInfo !== undefined) {
                       command.info[2][0] = userInfo.uid;
                       command.info[2][1] = userInfo.name;
