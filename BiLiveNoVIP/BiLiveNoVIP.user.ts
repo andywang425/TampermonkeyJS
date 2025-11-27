@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.3.5
+// @version             4.3.6
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -178,7 +178,7 @@ class NoVIP {
   private chatObserver!: MutationObserver
   private danmakuObserver!: MutationObserver
   private readonly defaultConfig: config = {
-    version: 1734189210657,
+    version: 1764243154073,
     menu: {
       noGiftMsg: {
         name: '屏蔽礼物相关',
@@ -249,28 +249,32 @@ class NoVIP {
         name: '屏蔽刷屏弹幕',
         enable: false
       },
+      noMirrorDanmaku: {
+        name: '屏蔽跨房弹幕',
+        enable: false
+      },
       noRoomSkin: {
         name: '屏蔽房间皮肤',
         enable: false
       },
       noActivityPlat: {
-        name: '屏蔽活动皮肤',
+        name: '屏蔽活动皮肤*',
         enable: false
       },
       noRoundPlay: {
-        name: '屏蔽视频轮播',
+        name: '屏蔽视频轮播*',
         enable: false
       },
       noSleep: {
-        name: '屏蔽挂机检测',
+        name: '屏蔽挂机检测*',
         enable: false
       },
       rankInvisible: {
-        name: '在线榜单隐身',
+        name: '在线榜单隐身*',
         enable: false
       },
       invisible: {
-        name: '进场隐身观看',
+        name: '进场隐身观看*',
         enable: false
       }
     }
@@ -490,6 +494,10 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
         apply: function (target, _this, args) {
           if (args[0] && args[0] instanceof Object && args[0].cmd) {
             const command = args[0]
+            // 屏蔽跨房弹幕
+            if (command.cmd === 'DANMU_MSG_MIRROR') {
+              command['info'][0][3] = 0xfefefe;
+            }
             // 在线榜单隐身
             if (that.config.menu.rankInvisible.enable) {
               if (command.cmd.startsWith('DANMU_MSG')) {
@@ -1295,6 +1303,17 @@ body:not(.player-full-win):has(iframe[src*="live-lottery"])[style*="overflow: hi
 /* 自定义 */
 .chat-item.NoVIP_chat_hide {
   display: none !important;
+}`
+    }
+    if (this.config.menu.noMirrorDanmaku.enable) {
+      cssText += `
+/* 屏蔽跨房聊天 */
+.chat-item[data-isunilivedanmaku="true"] {
+  display: none !important;
+}
+/* 屏蔽跨房弹幕 */
+.bili-danmaku-x-dm[style*="--color: #fefefe"] {
+  opacity: 0 !important;
 }`
     }
     if (this.config.menu.noBBDanmaku.enable) {
