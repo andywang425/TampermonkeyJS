@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.3.7
+// @version             4.3.8
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -803,6 +803,8 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
 #web-player-controller-wrap-el .web-live-player-gift-icon-wrap,
 /* 主播心愿 */
 .gift-wish-card-root,
+/* 彩蛋 */
+#easterEggCssContainer,
 
 #chat-gift-bubble-vm,
 #penury-gift-msg,
@@ -940,7 +942,7 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
 /* 点赞消息 */
 .chat-item[data-type="6"],
 /* 点赞数 */
-#head-info-vm .icon-ctnr:has(.like-icon) {
+#head-info-vm .heat-index-scroll {
   display: none !important;
 }
 /* 兼容chrome 105以下版本 */
@@ -954,44 +956,17 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
     if (this.config.menu.noGiftControl.enable) {
       cssText += `
 /* 排行榜 */
-.rank-list-section .gift-rank-cntr .top3-cntr .default,
-.rank-list-section .guard-rank-cntr:not(.open) .guard-empty {
-  height: 42px !important;
-}
-.rank-list-section .guard-rank-cntr:not(.open) .guard-empty {
-  background-size: contain !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-}
-.rank-list-section .gift-rank-cntr .top3-cntr .default-msg {
-  bottom: -12px !important;
-}
 .rank-list-section,
-.rank-list-section.new .rank-list-ctnr[style*="height: 178px;"] {
-  height: 98px !important;
-}
-.rank-list-section .tab-content,
-.rank-list-section .tab-content-pilot,
-.rank-list-section.new .guard-rank-cntr .rank-list-cntr {
-  min-height: unset !important;
-}
-.rank-list-section .tab-content[style*="height: 9"],
-.rank-list-section .tab-content-pilot[style*="height: 9"],
-.rank-list-section .gift-rank-cntr .top3-cntr {
-  height: 64px !important;
-}
-.rank-list-section .guard-rank-cntr .top3-cntr > span {
-  height: 32px !important;
-}
-.rank-list-section.new .gift-rank-cntr .top3-cntr,
-.rank-list-section.new .guard-rank-cntr {
-  height: unset !important;
+.rank-list-section.new .rank-list-ctnr[style*="height: 96px;"] {
+  height: 36px !important;
 }
 .rank-list-section.new .gift-rank-cntr .top3-cntr {
-  padding-top: 5px !important;
+  padding-top: 0px !important;
+  opacity: 0 !important;
 }
 .rank-list-section.new .guard-rank-cntr .top3-cntr {
-  top: 15px !important;
+  top: 0px !important;
+  opacity: 0 !important;
 }
 /* 调整聊天区 */
 .chat-history-panel {
