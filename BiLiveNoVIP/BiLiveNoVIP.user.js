@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                bilibili直播净化
 // @namespace           https://github.com/lzghzr/GreasemonkeyJS
-// @version             4.3.8
+// @version             4.3.9
 // @author              lzghzr
 // @description         增强直播屏蔽功能, 提高直播观看体验
 // @icon                data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIHN0cm9rZT0iIzAwYWVlYyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHRleHQgZm9udC1mYW1pbHk9Ik5vdG8gU2FucyBDSksgU0MiIGZvbnQtc2l6ZT0iMjIiIHg9IjUiIHk9IjIzIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iIzAwYWVlYyI+5ruaPC90ZXh0Pjwvc3ZnPg==
@@ -781,6 +781,21 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
     if (this.config.menu.noGiftMsg.enable) {
       height -= 32;
       cssText += `
+/* 调整 礼物聊天 聊天框 */
+.chat-item.danmaku-advanced-effect {
+  background: unset !important;
+  margin: unset !important;
+}
+.chat-item.danmaku-advanced-effect .username {
+  color: var(--brand_blue) !important;
+}
+.chat-item.danmaku-advanced-effect .username:after {
+  content: ' : ';
+}
+.chat-item .danmaku-advanced-effect-leave-content {
+  margin-top: unset !important;
+  color: var(--text2) !important;
+}
 /* 底部小礼物, 调整高度 */
 .chat-history-list.with-penury-gift {
   height: 100% !important;
@@ -805,6 +820,12 @@ $<mut_n>("text",{attrs:{"font-family":"Noto Sans CJK SC","font-size":"14",x:"5",
 .gift-wish-card-root,
 /* 彩蛋 */
 #easterEggCssContainer,
+/* 礼物聊天 */
+.chat-item .danmaku-advanced-effect-action,
+.chat-item .danmaku-advanced-effect-danmaku-name,
+.chat-item .danmaku-advanced-effect-gift-icon,
+.chat-item .danmaku-advanced-effect-gift-count,
+.chat-item .danmaku-advanced-effect-leave-prefix,
 
 #chat-gift-bubble-vm,
 #penury-gift-msg,
